@@ -1,8 +1,7 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, HTTPException
 import logging
 
-from app.services.wound_services import process_image
-from app.ai.model import predict_wound
+from app.services.wound_services import analyze_wound_image
 
 logger = logging.getLogger(__name__)
 
@@ -10,21 +9,11 @@ router = APIRouter()
 
 @router.post("/analyze")
 async def analyze_wound(image: UploadFile = File(...)):
-
-    logger.info(f"analyze_wound called")
     try:
-        image_bytes = await image.read()
-        img = process_image(image_bytes)
-        result = predict_wound(img)
-
-        return {
-            "urgency": result["risk"],
-            "confidence": result["confidence"],
-            "findings": [
-                "wound_detected"
-            ]
-        }
+        return analyze_wound_image(await image.read())
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
     except Exception as e:
-        logger.error(f"Error processing image: {str(e)}")
-        raise
+        raise HTTPException(status_code=500, detail="Internal server error")
