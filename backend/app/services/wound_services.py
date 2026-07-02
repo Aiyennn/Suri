@@ -4,49 +4,53 @@ services/wound_services.py
 Orchestration layer for the wound-analysis pipeline.
 
 This module sits between the API layer (``api/wound.py``) and the lower-level
-image-processing and AI sub-systems.  It coordinates the three-step pipeline:
+image-processing and AI sub-systems.  It coordinates a four-step pipeline:
 
     1. Decode raw image bytes into a NumPy array (via ``image_processing``).
     2. Assess image quality and gate on minimum thresholds (via ``image_quality``).
     3. Run AI inference on the validated image (via ``ai.model``).
+    4. Apply deterministic rule-engine assessment (via ``engine``).
 
-Keeping this logic in a service module (rather than directly in the router)
-makes it easy to unit-test without spinning up an HTTP server, and allows the
-same pipeline to be reused from CLI scripts or batch jobs.
+The AI model (step 3) performs *observation and classification only*.
+All risk scoring, recommendations, referral decisions, and follow-up
+scheduling are produced exclusively by the rule engine (step 4).
 """
 
 from services.image_quality import assess_image_quality
 from services.image_processing import process_image
 from ai.model import analyze_wound
+from engine import WoundAssessmentEngine
 
 import logging
 
 logger = logging.getLogger(__name__)
 
+# Module-level engine instance — initialised once, reused across requests.
+_engine = WoundAssessmentEngine()
+
 
 def analyze_wound_image(image_bytes: bytes) -> dict:
     """
-    Run the full wound-analysis pipeline on a single raw image.
+    Run the full wound-analysis pipeline on raw image bytes.
 
-    Steps:
-        1. **Decode** – Convert raw bytes to a BGR NumPy array using OpenCV.
-        2. **Quality gate** – Compute blur, brightness, and contrast metrics.
-           Raise ``ValueError`` if the image does not meet minimum thresholds.
-        3. **AI inference** – Pass the decoded image to the wound-risk model
-           and return its prediction.
+    Parameters
+    ----------
+    image_bytes:
+        Raw bytes of the uploaded wound image.
 
-    Args:
-        image_bytes (bytes): Raw binary content of the uploaded image file.
+    Returns
+    -------
+    dict
+        Serialised :class:`engine.models.AssessmentResult` containing:
+        risk score, risk level, recommendations, referral flag, emergency
+        flag, follow-up timing, and all triggered rule explanations.
 
-    Returns:
-        dict: AI model output containing at minimum:
-            - ``"risk"`` (str): ``"low"``, ``"medium"``, or ``"high"``.
-            - ``"confidence"`` (float): Model confidence in [0.0, 1.0].
-
-    Raises:
-        ValueError: If the image quality assessment fails (too blurry,
-                    too dark, overexposed, or low contrast).
-        cv2.error: If the image bytes cannot be decoded as a valid image.
+    Raises
+    ------
+    ValueError
+        If the image quality is below the minimum acceptable threshold.
+    engine.validation.InputValidationError
+        If the AI model output does not conform to the expected schema.
     """
     logger.info("analyze_wound_image called")
 
@@ -60,4 +64,19 @@ def analyze_wound_image(image_bytes: bytes) -> dict:
         raise ValueError("Image quality too low")
 
     # Step 3: Run AI inference on the validated image.
-    return analyze_wound(img)
+    # The model returns structured observations and classifications only —
+    # it never produces treatment recommendations.
+    model_output = analyze_wound(img)
+    logger.info("AI model inference complete.")
+
+    # Step 4: Apply the deterministic rule engine to the model output.
+    # All risk assessments, recommendations, referrals, and follow-up
+    # decisions originate here — never from the AI model.
+    assessment = _engine.assess(model_output)
+    logger.info(
+        "Rule engine assessment complete — level=%s, emergency=%s.",
+        assessment.risk_level,
+        assessment.emergency,
+    )
+
+    return assessment.model_dump()

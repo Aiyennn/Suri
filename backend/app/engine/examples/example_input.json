@@ -1,0 +1,17 @@
+{
+  "classification": {
+    "wound_type": "abrasion",
+    "severity": "moderate",
+    "healing_stage": "inflammatory"
+  },
+  "observations": {
+    "redness": true,
+    "bleeding": "minimal",
+    "exudate": {
+      "present": true,
+      "type": "serous",
+      "amount": "low"
+    }
+  },
+  "confidence": 0.94
+}

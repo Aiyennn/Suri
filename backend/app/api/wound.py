@@ -34,8 +34,6 @@ from services.wound_services import analyze_wound_image
 
 logger = logging.getLogger(__name__)
 
-# All routes defined here are registered on this router object.
-# ``main.py`` mounts it at the /wound prefix.
 router = APIRouter()
 
 
@@ -73,33 +71,18 @@ async def analyze_wound(
         duration:        How long the wound has been present.
         medical_history: Relevant medical background.
         images:          Uploaded image files.
-
-    Returns:
-        dict: ``{"patient": {...}, "results": [{risk, confidence}, ...]}``
-
-    Raises:
-        HTTPException 400: If ``symptoms`` is not valid JSON, or if any image
-                           fails the quality check (too blurry / over-/under-exposed).
-        HTTPException 500: For any unexpected server-side error.
     """
     try:
-        # ``symptoms`` arrives as a raw JSON string from the form payload.
-        # Parse it here so the rest of the pipeline works with a plain list.
+
         symptoms_list = json.loads(symptoms)
 
-        # Process each uploaded image independently so the caller receives
-        # a per-image result (useful when multiple angles are submitted).
         image_results = []
         for image in images:
-            # Read the entire file into memory as raw bytes.
             image_bytes = await image.read()
 
-            # Decode, quality-check, and run AI inference.
-            # Raises ValueError if the image does not meet quality thresholds.
             result = analyze_wound_image(image_bytes)
             image_results.append(result)
 
-        # Return the echoed patient context alongside the per-image results.
         return {
             "patient": {
                 "age": age,
@@ -112,12 +95,8 @@ async def analyze_wound(
         }
 
     except ValueError as e:
-        # Raised by json.loads (malformed symptoms) or by the quality checker
-        # (image quality too low).  Surfaces a clear 400 to the caller.
         raise HTTPException(status_code=400, detail=str(e))
 
     except Exception:
-        # Catch-all for unexpected errors (e.g. corrupt image, model crash).
-        # Log internally but return a generic 500 to avoid leaking internals.
         logger.exception("Unexpected error in analyze_wound endpoint")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error")
