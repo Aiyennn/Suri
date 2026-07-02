@@ -1,6 +1,6 @@
 import logging
 from fastapi import FastAPI
-from app.api.wound import router as wound_router
+from api.wound import router as wound_router
 
 logging.basicConfig(
     level=logging.INFO,
