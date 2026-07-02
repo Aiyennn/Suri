@@ -14,10 +14,6 @@ quality checks:
                        images wash out tissue detail.
     - **Contrast**   – Grayscale standard deviation must be >= 15.
                        Low contrast flattens wound-vs-healthy-tissue differences.
-
-These thresholds were chosen empirically and may be adjusted as the model
-evolves.  See ``utils/image_processing.py`` for the underlying metric
-implementations.
 """
 
 from utils.image_processing import (
