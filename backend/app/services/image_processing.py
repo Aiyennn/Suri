@@ -11,6 +11,7 @@ model can consume.
 import numpy as np
 import cv2
 import logging
+from exceptions import InvalidImageError
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +26,38 @@ def process_image(image_bytes: bytes):
     (e.g. grayscale JPEG, RGBA PNG).
 
     """
-    logger.info("Processing Image")
-    # Wrap bytes in a NumPy array without copying — imdecode reads from this buffer.
-    np_arr = np.frombuffer(image_bytes, np.uint8)
-    # Decode into a 3-channel BGR image (IMREAD_COLOR discards alpha channels).
-    image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-    return image
+    logger.debug(
+        "Starting image decoding (size=%d bytes)",
+        len(image_bytes)
+    )
+
+    try:
+        # Wrap bytes in a NumPy array without copying — imdecode reads from this buffer.
+        np_arr = np.frombuffer(image_bytes, np.uint8)
+
+        logger.debug(
+            "Created NumPy buffer (shape=%s dtype=%s)",
+            np_arr.shape,
+            np_arr.dtype,
+        )
+
+        # Decode into a 3-channel BGR image (IMREAD_COLOR discards alpha channels).
+        image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+        if image is None:
+            logger.warning(
+                "OpenCV failed to decode image (size=%d bytes)",
+                len(image_bytes),
+            )
+            raise InvalidImageError 
+        
+        logger.info(
+            "Image decoded successfully (shape=%s dtype=%s)",
+            image.shape,
+            image.dtype
+        )
+        
+        return image
+
+    except Exception:
+        raise

@@ -52,7 +52,7 @@ def analyze_wound_image(image_bytes: bytes) -> dict:
     engine.validation.InputValidationError
         If the AI model output does not conform to the expected schema.
     """
-    logger.info("analyze_wound_image called")
+    logger.info("Starting analyzing wound image")
 
     # Step 1: Decode the raw bytes into a NumPy BGR image array.
     img = process_image(image_bytes)

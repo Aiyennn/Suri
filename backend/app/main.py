@@ -12,12 +12,15 @@ from api.wound import router as wound_router
 
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.DEBUG,
+    format=(
+        "%(asctime)s | %(levelname)-8s | "
+        "%(name)s | %(funcName)s:%(lineno)d | %(message)s"
+    ),
 )
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------`------------------------
 # Application
 # ---------------------------------------------------------------------------
 app = FastAPI(

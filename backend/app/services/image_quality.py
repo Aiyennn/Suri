@@ -67,9 +67,15 @@ def assess_image_quality(image) -> dict:
             - ``"is_valid"`` (bool): ``True`` if all thresholds are satisfied.
             - ``"metrics"``  (dict): Raw metric values (blur, brightness, contrast).
     """
-    logger.info("Assessing image quality")
+    logger.debug(
+        "Starting image quality assestment"
+    )
+
     metrics = compute_image_quality(image)
-    print(metrics)  # TODO: replace with structured logger when log aggregation is set up
+
+    logger.info(
+        "Image quality assestment complete"
+    )
 
     # Individual quality checks — each maps to a specific failure mode.
     is_blurry     = metrics["blur"]       < 100   # Laplacian variance too low → blurry

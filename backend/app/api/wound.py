@@ -94,9 +94,15 @@ async def analyze_wound(
             "results": image_results,
         }
 
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
     except Exception:
-        logger.exception("Unexpected error in analyze_wound endpoint")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.exception(
+            "Unexpected error during would analysis"
+            "(images=%d age=%s sex=%s)",
+            len(images),
+            age,
+            sex
+        )
+        raise HTTPException(
+            status_code = 500,
+            detail="Internal Server Error"
+        )
