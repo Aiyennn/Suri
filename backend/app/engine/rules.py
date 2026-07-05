@@ -28,7 +28,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from engine.models import (
+from .models import (
     BleedingLevel,
     ExudateAmount,
     ExudateType,

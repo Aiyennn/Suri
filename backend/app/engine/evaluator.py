@@ -15,9 +15,9 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from engine.models import WoundAssessmentInput
-from engine.registry import RuleRegistry
-from engine.rules import Rule
+from .models import WoundAssessmentInput
+from .registry import RuleRegistry
+from .rules import Rule
 
 logger = logging.getLogger(__name__)
 

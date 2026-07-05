@@ -21,7 +21,7 @@ or overridden in tests without instantiating a custom class.
 
 from __future__ import annotations
 
-from engine.models import RiskLevel
+from .models import RiskLevel
 
 # ---------------------------------------------------------------------------
 # Threshold constants (inclusive lower bounds, ascending order)

@@ -10,7 +10,7 @@ wins), and appends a universal safety footer.
 
 from __future__ import annotations
 
-from engine.evaluator import EvaluationResult
+from .evaluator import EvaluationResult
 
 
 # ---------------------------------------------------------------------------

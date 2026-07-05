@@ -28,7 +28,7 @@ Adding a custom rule from outside the engine::
 
 from __future__ import annotations
 
-from engine.rules import Rule, RULES
+from .rules import Rule, RULES
 
 
 class RuleRegistry:

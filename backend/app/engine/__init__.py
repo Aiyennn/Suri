@@ -13,6 +13,6 @@ Example
 >>> result = engine.assess(raw_model_output)
 """
 
-from engine.engine import WoundAssessmentEngine
+from .engine import WoundAssessmentEngine
 
 __all__ = ["WoundAssessmentEngine"]

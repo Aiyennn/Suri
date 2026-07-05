@@ -24,14 +24,14 @@ from __future__ import annotations
 
 import logging
 
-from engine.evaluator import RuleEvaluator
-from engine.followup import FollowUpScheduler
-from engine.models import AssessmentResult, TriggeredRule
-from engine.recommendations import RecommendationEngine
-from engine.referrals import ReferralEngine
-from engine.registry import rule_registry
-from engine.scoring import RiskScorer
-from engine.validation import validate_input
+from .evaluator import RuleEvaluator
+from .followup import FollowUpScheduler
+from .models import AssessmentResult, TriggeredRule
+from .recommendations import RecommendationEngine
+from .referrals import ReferralEngine
+from .registry import rule_registry
+from .scoring import RiskScorer
+from .validation import validate_input
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,9 @@ class WoundAssessmentEngine:
         logger.info("WoundAssessmentEngine.assess() — starting pipeline.")
 
         # 1. Validate
+        logger.info("Raw model output:\n%s", raw_model_output)
         assessment_input = validate_input(raw_model_output)
+        
         logger.debug("Input validated: %s", assessment_input)
 
         # 2. Evaluate rules

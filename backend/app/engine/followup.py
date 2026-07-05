@@ -19,8 +19,8 @@ Default timing bands
 
 from __future__ import annotations
 
-from engine.evaluator import EvaluationResult
-from engine.models import RiskLevel
+from .evaluator import EvaluationResult
+from .models import RiskLevel
 
 
 # ---------------------------------------------------------------------------
