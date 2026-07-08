@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 _engine = WoundAssessmentEngine()
 
 
-def analyze_wound_image(image_bytes: bytes) -> dict:
+def analyze_wound_image(image_bytes: bytes, duration: str | None = None) -> dict:
     """
     Run the full wound-analysis pipeline on raw image bytes.
 
@@ -37,6 +37,8 @@ def analyze_wound_image(image_bytes: bytes) -> dict:
     ----------
     image_bytes:
         Raw bytes of the uploaded wound image.
+    duration:
+        Optional patient-reported wound duration (e.g. ``"1-3 Days"``).
 
     Returns
     -------
@@ -72,7 +74,8 @@ def analyze_wound_image(image_bytes: bytes) -> dict:
     # Step 4: Apply the deterministic rule engine to the model output.
     # All risk assessments, recommendations, referrals, and follow-up
     # decisions originate here — never from the AI model.
-    assessment = _engine.assess(model_output)
+    patient_context = {"duration": duration} if duration else None
+    assessment = _engine.assess(model_output, patient_context=patient_context)
     logger.info(
         "Rule engine assessment complete — level=%s, emergency=%s.",
         assessment.risk_level,

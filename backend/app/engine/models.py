@@ -76,6 +76,15 @@ class RiskLevel(str, Enum):
     CRITICAL = "Critical"
 
 
+class WoundDuration(str, Enum):
+    """How long the wound has been present (matches frontend options)."""
+
+    LESS_THAN_24H = "< 24h"
+    ONE_TO_THREE_DAYS = "1-3 Days"
+    ONE_WEEK = "1 Week"
+    MORE_THAN_ONE_WEEK = "> 1 Week"
+
+
 # ---------------------------------------------------------------------------
 # Input models
 # ---------------------------------------------------------------------------
@@ -118,16 +127,20 @@ class Classification(BaseModel):
 
 class WoundAssessmentInput(BaseModel):
     """
-    Complete structured input from the AI vision model.
+    Complete structured input for the rule engine.
 
-    This is the only object the rule engine operates on.  It must be
-    fully populated and schema-valid before evaluation begins.
+    Combines the AI vision model's output (classification, observations,
+    confidence) with optional patient-supplied context (duration).
     """
 
     classification: Classification
     observations: Observations
     confidence: float = Field(
         ge=0.0, le=1.0, description="Model confidence in [0, 1]."
+    )
+    duration: Optional[WoundDuration] = Field(
+        default=None,
+        description="How long the wound has been present (patient-reported).",
     )
 
 

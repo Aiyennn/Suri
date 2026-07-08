@@ -35,6 +35,7 @@ from .models import (
     HealingStage,
     Severity,
     WoundAssessmentInput,
+    WoundDuration,
     WoundType,
 )
 
@@ -327,6 +328,109 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=48,
+    ),
+
+    # -----------------------------------------------------------------------
+    # Duration-based  (priority 40–49)
+    # -----------------------------------------------------------------------
+
+    Rule(
+        id="DUR_WEEK_PLUS_MODERATE",
+        name="Chronic Wound (>1 Week, ≥Moderate)",
+        description=(
+            "A wound present for more than one week with moderate or higher "
+            "severity suggests impaired healing requiring professional assessment."
+        ),
+        condition=lambda i: (
+            i.duration == WoundDuration.MORE_THAN_ONE_WEEK
+            and i.classification.severity in (Severity.MODERATE, Severity.SEVERE, Severity.CRITICAL)
+        ),
+        priority=40,
+        score=3,
+        recommendation=(
+            "This wound has been present for over a week and shows moderate or "
+            "greater severity. Prolonged wound duration increases infection risk. "
+            "Consult a healthcare provider for evaluation and a wound-care plan."
+        ),
+        explanation="Wound present >1 week with moderate-or-higher severity.",
+        forces_referral=True,
+        forces_emergency=False,
+        follow_up_hours=24,
+    ),
+
+    Rule(
+        id="DUR_WEEK_NOT_PROLIFERATIVE",
+        name="Stalled Healing (1 Week, Not Progressing)",
+        description=(
+            "After one week most wounds should be entering the proliferative phase. "
+            "Remaining in earlier stages may indicate stalled healing."
+        ),
+        condition=lambda i: (
+            i.duration == WoundDuration.ONE_WEEK
+            and i.classification.healing_stage not in (
+                HealingStage.PROLIFERATIVE, HealingStage.MATURATION,
+            )
+        ),
+        priority=41,
+        score=2,
+        recommendation=(
+            "This wound has been present for about a week but does not appear to "
+            "be progressing into the proliferative healing stage. "
+            "Consider seeking medical advice to rule out infection or other complications."
+        ),
+        explanation="Wound present ~1 week and healing stage has not progressed to proliferative.",
+        forces_referral=True,
+        forces_emergency=False,
+        follow_up_hours=48,
+    ),
+
+    Rule(
+        id="DUR_1_3_DAYS_INFLAMMATORY",
+        name="Prolonged Inflammation (1–3 Days)",
+        description=(
+            "Inflammation with redness lasting 1–3 days is expected but warrants "
+            "monitoring for worsening."
+        ),
+        condition=lambda i: (
+            i.duration == WoundDuration.ONE_TO_THREE_DAYS
+            and i.classification.healing_stage == HealingStage.INFLAMMATORY
+            and i.observations.redness
+        ),
+        priority=42,
+        score=1,
+        recommendation=(
+            "Inflammation and redness at 1–3 days is within the normal healing window. "
+            "Continue monitoring — if redness spreads, warmth increases, or you "
+            "develop a fever, seek medical attention."
+        ),
+        explanation="Wound showing inflammation with redness at 1–3 days.",
+        forces_referral=False,
+        forces_emergency=False,
+        follow_up_hours=72,
+    ),
+
+    Rule(
+        id="DUR_RECENT_MILD",
+        name="Recent Mild Wound (<24h)",
+        description=(
+            "A mild wound less than 24 hours old is typically manageable with "
+            "basic home care."
+        ),
+        condition=lambda i: (
+            i.duration == WoundDuration.LESS_THAN_24H
+            and i.classification.severity == Severity.MILD
+        ),
+        priority=43,
+        score=0,
+        recommendation=(
+            "This wound is recent and mild. Clean gently with soap and water, "
+            "apply an antiseptic, and cover with a sterile dressing. "
+            "Monitor for signs of infection over the next few days."
+        ),
+        explanation="Mild wound less than 24 hours old — standard home care appropriate.",
+        forces_referral=False,
+        forces_emergency=False,
+        follow_up_hours=None,
     ),
 
     # -----------------------------------------------------------------------

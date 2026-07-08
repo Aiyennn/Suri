@@ -76,7 +76,7 @@ class WoundAssessmentEngine:
         self._referral = referral_engine or ReferralEngine()
         self._follow_up = follow_up_scheduler or FollowUpScheduler()
 
-    def assess(self, raw_model_output: dict) -> AssessmentResult:
+    def assess(self, raw_model_output: dict, patient_context: dict | None = None) -> AssessmentResult:
         """
         Run the full deterministic assessment pipeline.
 
@@ -84,6 +84,9 @@ class WoundAssessmentEngine:
         ----------
         raw_model_output:
             Unvalidated dictionary produced by the AI vision model.
+        patient_context:
+            Optional patient-supplied context (e.g. ``{"duration": "1-3 Days"}``).
+            Relevant fields are merged into the engine input before validation.
 
         Returns
         -------
@@ -97,9 +100,15 @@ class WoundAssessmentEngine:
         """
         logger.info("WoundAssessmentEngine.assess() — starting pipeline.")
 
-        # 1. Validate
+        # 1. Validate — merge patient context before validation
         logger.info("Raw model output:\n%s", raw_model_output)
-        assessment_input = validate_input(raw_model_output)
+
+        engine_input = dict(raw_model_output)
+        if patient_context:
+            if "duration" in patient_context and patient_context["duration"]:
+                engine_input["duration"] = patient_context["duration"]
+
+        assessment_input = validate_input(engine_input)
         
         logger.debug("Input validated: %s", assessment_input)
 

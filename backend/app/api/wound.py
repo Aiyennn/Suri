@@ -80,7 +80,8 @@ async def analyze_wound(
         for image in images:
             image_bytes = await image.read()
 
-            result = analyze_wound_image(image_bytes)
+            # Using wound image and duration for now
+            result = analyze_wound_image(image_bytes, duration=duration)
             image_results.append(result)
 
         return {
