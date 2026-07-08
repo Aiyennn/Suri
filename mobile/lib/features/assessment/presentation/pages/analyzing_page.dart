@@ -32,9 +32,23 @@ class _AnalyzingPageState extends ConsumerState<AnalyzingPage> {
   }
 
   Future<void> _startAnalysis() async {
-    await ref.read(assessmentProvider.notifier).startAnalysis();
+    final notifier = ref.read(assessmentProvider.notifier);
+    await notifier.startAnalysis();
+    
     if (mounted) {
-      context.go(RoutePaths.results);
+      final state = ref.read(assessmentProvider);
+      if (state.error != null) {
+        // Show error and allow user to go back
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Analysis failed: ${state.error}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        // We do not go to ResultsPage on error
+      } else {
+        context.go(RoutePaths.results);
+      }
     }
   }
 

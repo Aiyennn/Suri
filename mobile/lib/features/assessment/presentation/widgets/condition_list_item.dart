@@ -4,17 +4,17 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
-/// Condition row with name, description, and percentage bar.
+/// Rule row with name, reason, and score contribution.
 class ConditionListItem extends StatelessWidget {
   final String name;
   final String description;
-  final double percentage;
+  final int scoreContribution;
 
   const ConditionListItem({
     super.key,
     required this.name,
     required this.description,
-    required this.percentage,
+    required this.scoreContribution,
   });
 
   @override
@@ -23,7 +23,7 @@ class ConditionListItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: [
-          // Condition info
+          // Rule info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,30 +34,21 @@ class ConditionListItem extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          // Percentage
-          SizedBox(
-            width: 90,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${(percentage * 100).toInt()}%',
-                  style: AppTextStyles.labelLg.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: percentage,
-                    minHeight: 4,
-                    backgroundColor: AppColors.primaryLight,
-                    valueColor:
-                        const AlwaysStoppedAnimation(AppColors.primary),
-                  ),
-                ),
-              ],
+          // Score contribution
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.errorLight.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: AppColors.error.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Text(
+              '+$scoreContribution',
+              style: AppTextStyles.labelLg.copyWith(
+                color: AppColors.error,
+              ),
             ),
           ),
         ],

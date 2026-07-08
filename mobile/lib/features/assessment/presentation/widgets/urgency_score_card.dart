@@ -10,14 +10,12 @@ class UrgencyScoreCard extends StatelessWidget {
   final int score;
   final String title;
   final String description;
-  final double confidence;
 
   const UrgencyScoreCard({
     super.key,
     required this.score,
     required this.title,
     required this.description,
-    required this.confidence,
   });
 
   Color get _urgencyColor {
@@ -97,18 +95,6 @@ class UrgencyScoreCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(title, style: AppTextStyles.headingMd),
-          ),
-          const SizedBox(height: 4),
-
-          // Confidence
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'AI Confidence: ${(confidence * 100).toInt()}%',
-              style: AppTextStyles.bodySm.copyWith(
-                color: AppColors.textTertiary,
-              ),
-            ),
           ),
           const SizedBox(height: AppSpacing.md),
 

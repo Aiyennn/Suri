@@ -232,26 +232,55 @@ class _PatientDetailsPageState extends ConsumerState<PatientDetailsPage> {
                   ),
                   const SizedBox(height: AppSpacing.lg),
 
-                  // Medical History (expandable)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      border: Border.all(color: AppColors.cardBorder),
-                    ),
-                    child: ListTile(
-                      leading: Icon(Icons.history_rounded,
-                          color: AppColors.textSecondary),
-                      title: Text(AppStrings.medicalHistory,
-                          style: AppTextStyles.labelLg),
-                      trailing: const Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: AppColors.textSecondary,
-                      ),
-                      onTap: () {
-                        // Could expand into a form
-                      },
+                  // Medical History (text field)
+                  SectionCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.history_rounded,
+                                color: AppColors.textSecondary, size: 18),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(AppStrings.medicalHistory,
+                                style: AppTextStyles.labelLg),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        TextField(
+                          maxLines: 3,
+                          style: AppTextStyles.bodyMd,
+                          decoration: InputDecoration(
+                            hintText:
+                                'e.g. Diabetes, hypertension, allergies…',
+                            hintStyle: AppTextStyles.bodyMd.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                            filled: true,
+                            fillColor: AppColors.background,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSm),
+                              borderSide:
+                                  BorderSide(color: AppColors.cardBorder),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSm),
+                              borderSide:
+                                  BorderSide(color: AppColors.cardBorder),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusSm),
+                              borderSide: BorderSide(
+                                  color: AppColors.primary, width: 1.5),
+                            ),
+                            contentPadding: const EdgeInsets.all(AppSpacing.md),
+                          ),
+                          onChanged: notifier.updateMedicalHistory,
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),

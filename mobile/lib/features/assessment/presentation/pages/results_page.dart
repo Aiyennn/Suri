@@ -15,7 +15,6 @@ import '../providers/assessment_provider.dart';
 import '../widgets/ai_reasoning_section.dart';
 import '../widgets/condition_list_item.dart';
 import '../widgets/recommendation_card.dart';
-import '../widgets/self_care_tile.dart';
 import '../widgets/urgency_score_card.dart';
 
 /// Results / Assessment Ready page (Screen 5).
@@ -27,7 +26,7 @@ class ResultsPage extends ConsumerStatefulWidget {
 }
 
 class _ResultsPageState extends ConsumerState<ResultsPage> {
-  bool _showAllConditions = false;
+  bool _showAllRules = false;
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +45,10 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
       );
     }
 
-    final visibleConditions = _showAllConditions
-        ? assessment.conditions
-        : assessment.conditions.take(2).toList();
-    final hiddenCount = assessment.conditions.length - 2;
+    final visibleRules = _showAllRules
+        ? assessment.triggeredRules
+        : assessment.triggeredRules.take(2).toList();
+    final hiddenCount = assessment.triggeredRules.length - 2;
 
     return Scaffold(
       appBar: AppTopBar(
@@ -65,17 +64,18 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
           children: [
             // Urgency score card
             UrgencyScoreCard(
-              score: assessment.score,
-              title: assessment.urgencyTitle,
-              description: assessment.urgencyDescription,
-              confidence: assessment.confidence,
+              score: assessment.riskScore,
+              title: assessment.riskLevel,
+              description: assessment.disclaimer,
             ),
             const SizedBox(height: AppSpacing.xl),
 
             // Recommendation card
             RecommendationCard(
-              timeframe: assessment.timeframe,
-              description: assessment.recommendationDescription,
+              timeframe: assessment.followUp,
+              description: assessment.recommendations.isNotEmpty 
+                  ? assessment.recommendations.first 
+                  : 'Please consult a healthcare professional.',
               buttonLabel: AppStrings.findNearbyClinic,
               onButtonPressed: () {
                 // Open map or clinic finder
@@ -83,25 +83,23 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
             ),
             const SizedBox(height: AppSpacing.xxl),
 
-            // Possible Conditions
-            Text(AppStrings.possibleConditions,
-                style: AppTextStyles.headingSm),
+            // Triggered Rules (Clinical Findings)
+            Text("Clinical Findings", style: AppTextStyles.headingSm),
             const SizedBox(height: AppSpacing.sm),
-            ...visibleConditions.map((c) => ConditionListItem(
-                  name: c.name,
-                  description: c.description,
-                  percentage: c.percentage,
+            ...visibleRules.map((r) => ConditionListItem(
+                  name: r.name,
+                  description: r.reason,
+                  scoreContribution: r.scoreContribution,
                 )),
 
             // View more
-            if (!_showAllConditions && hiddenCount > 0)
+            if (!_showAllRules && hiddenCount > 0)
               TextButton.icon(
-                onPressed: () =>
-                    setState(() => _showAllConditions = true),
-                icon: Icon(Icons.keyboard_arrow_down_rounded,
+                onPressed: () => setState(() => _showAllRules = true),
+                icon: const Icon(Icons.keyboard_arrow_down_rounded,
                     size: 20, color: AppColors.primary),
                 label: Text(
-                  'View $hiddenCount more results',
+                  'View $hiddenCount more findings',
                   style: AppTextStyles.bodyMd.copyWith(
                     color: AppColors.primary,
                   ),
@@ -109,24 +107,11 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
               ),
             const SizedBox(height: AppSpacing.xl),
 
-            // AI Reasoning
+            // AI Reasoning (All recommendations)
             AiReasoningSection(
-              reasoningPoints: assessment.reasoningPoints,
+              reasoningPoints: assessment.recommendations,
             ),
             const SizedBox(height: AppSpacing.xxl),
-
-            // Self-Care
-            Text(AppStrings.immediateSelfCare,
-                style: AppTextStyles.labelMd.copyWith(
-                  letterSpacing: 1,
-                  color: AppColors.textTertiary,
-                )),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: _buildSelfCareItems(assessment.selfCareItems),
-            ),
-            const SizedBox(height: AppSpacing.xxxl),
 
             // Action buttons
             Row(
@@ -150,35 +135,22 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
             ),
             const SizedBox(height: AppSpacing.md),
 
-            // Emergency button
-            DangerButton(
-              label: AppStrings.callEmergency,
-              icon: Icons.phone,
-              onPressed: () {
-                // Launch phone dialer
-              },
-            ),
-            const SizedBox(height: AppSpacing.xxl),
+            // Emergency button (Conditionally rendered)
+            if (assessment.emergency)
+              DangerButton(
+                label: AppStrings.callEmergency,
+                icon: Icons.phone,
+                onPressed: () {
+                  // Launch phone dialer
+                },
+              ),
+            if (assessment.emergency) const SizedBox(height: AppSpacing.xxl),
+            
+            // Padding if emergency is absent
+            if (!assessment.emergency) const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
     );
-  }
-
-  List<Widget> _buildSelfCareItems(
-      List<dynamic> items) {
-    final iconMap = <String, IconData>{
-      'water_drop': Icons.water_drop_outlined,
-      'bed': Icons.bed_outlined,
-      'thermostat': Icons.thermostat_outlined,
-      'shield': Icons.shield_outlined,
-    };
-
-    return items.map((item) {
-      return SelfCareTile(
-        icon: iconMap[item.iconName] ?? Icons.health_and_safety_outlined,
-        label: item.label,
-      );
-    }).toList();
   }
 }

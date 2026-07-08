@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../config/routes/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -16,6 +17,8 @@ import '../widgets/image_preview_tile.dart';
 import '../widgets/upload_progress.dart';
 
 /// Upload Medical Images page (Screen 3).
+/// Only the "Wound" category is enabled for upload; all others are
+/// shown but disabled per the product requirement.
 class UploadImagesPage extends ConsumerWidget {
   const UploadImagesPage({super.key});
 
@@ -43,11 +46,14 @@ class UploadImagesPage extends ConsumerWidget {
                   Text(AppStrings.uploadMedicalImages,
                       style: AppTextStyles.headingLg),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(AppStrings.uploadSubtitle,
-                      style: AppTextStyles.bodyMd),
+                  Text(
+                    'Upload a clear photo of the wound for AI analysis. '
+                    'High-quality lighting improves accuracy.',
+                    style: AppTextStyles.bodyMd,
+                  ),
                   const SizedBox(height: AppSpacing.xxl),
 
-                  // Category grid
+                  // Category grid – only Wound is enabled
                   GridView.count(
                     crossAxisCount: 2,
                     shrinkWrap: true,
@@ -56,47 +62,42 @@ class UploadImagesPage extends ConsumerWidget {
                     crossAxisSpacing: AppSpacing.md,
                     childAspectRatio: 1.1,
                     children: [
-                      ImageCategoryCard(
+                      // ── Skin (disabled) ──────────────────────────────────
+                      const ImageCategoryCard(
                         label: AppStrings.skin,
                         icon: Icons.front_hand_outlined,
-                        imageCount:
-                            state.categoryImageCounts['skin'] ?? 0,
-                        onUpload: () => _simulateImagePick(
-                            notifier, 'skin'),
-                        onCamera: () => _simulateImagePick(
-                            notifier, 'skin'),
+                        imageCount: 0,
+                        disabled: true,
                       ),
-                      ImageCategoryCard(
+
+                      // ── Throat (disabled) ────────────────────────────────
+                      const ImageCategoryCard(
                         label: AppStrings.throat,
                         icon: Icons.air_outlined,
-                        imageCount:
-                            state.categoryImageCounts['throat'] ?? 0,
+                        imageCount: 0,
                         badgeColor: AppColors.primary,
-                        onUpload: () => _simulateImagePick(
-                            notifier, 'throat'),
-                        onCamera: () => _simulateImagePick(
-                            notifier, 'throat'),
+                        disabled: true,
                       ),
-                      ImageCategoryCard(
+
+                      // ── Eye (disabled) ───────────────────────────────────
+                      const ImageCategoryCard(
                         label: AppStrings.eye,
                         icon: Icons.visibility_outlined,
-                        imageCount:
-                            state.categoryImageCounts['eye'] ?? 0,
-                        onUpload: () =>
-                            _simulateImagePick(notifier, 'eye'),
-                        onCamera: () =>
-                            _simulateImagePick(notifier, 'eye'),
+                        imageCount: 0,
+                        disabled: true,
                       ),
+
+                      // ── Wound (ENABLED) ──────────────────────────────────
                       ImageCategoryCard(
                         label: AppStrings.wound,
                         icon: Icons.healing_outlined,
                         imageCount:
                             state.categoryImageCounts['wound'] ?? 0,
                         badgeColor: AppColors.error,
-                        onUpload: () => _simulateImagePick(
-                            notifier, 'wound'),
-                        onCamera: () => _simulateImagePick(
-                            notifier, 'wound'),
+                        onUpload: () =>
+                            _pickImage(notifier, ImageSource.gallery),
+                        onCamera: () =>
+                            _pickImage(notifier, ImageSource.camera),
                       ),
                     ],
                   ),
@@ -135,8 +136,8 @@ class UploadImagesPage extends ConsumerWidget {
                               .entries
                               .map((entry) {
                             return Padding(
-                              padding:
-                                  const EdgeInsets.only(right: AppSpacing.sm),
+                              padding: const EdgeInsets.only(
+                                  right: AppSpacing.sm),
                               child: ImagePreviewTile(
                                 imagePath: entry.value,
                                 onRemove: () =>
@@ -146,7 +147,7 @@ class UploadImagesPage extends ConsumerWidget {
                           }),
                           AddImageTile(
                             onTap: () =>
-                                _simulateImagePick(notifier, 'skin'),
+                                _pickImage(notifier, ImageSource.gallery),
                           ),
                         ],
                       ),
@@ -178,7 +179,9 @@ class UploadImagesPage extends ConsumerWidget {
             child: PrimaryButton(
               label: AppStrings.analyzeHealthRisk,
               trailingIcon: Icons.search,
-              onPressed: () => context.push(RoutePaths.analyzing),
+              onPressed: state.uploadedImagePaths.isEmpty
+                  ? null
+                  : () => context.push(RoutePaths.analyzing),
             ),
           ),
         ],
@@ -186,10 +189,14 @@ class UploadImagesPage extends ConsumerWidget {
     );
   }
 
-  /// Simulate picking an image (mock data).
-  void _simulateImagePick(
-      AssessmentNotifier notifier, String category) {
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    notifier.addImage('mock_image_$id', category);
+  /// Open the device gallery or camera and store the selected image path.
+  Future<void> _pickImage(
+      AssessmentNotifier notifier, ImageSource source) async {
+    final picker = ImagePicker();
+    final XFile? picked =
+        await picker.pickImage(source: source, imageQuality: 85);
+    if (picked != null) {
+      notifier.addImage(picked.path, 'wound');
+    }
   }
 }

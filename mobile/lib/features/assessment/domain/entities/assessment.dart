@@ -1,64 +1,69 @@
-import 'condition.dart';
+/// Represents a rule triggered by the deterministic engine.
+class TriggeredRule {
+  final String id;
+  final String name;
+  final String reason;
+  final int scoreContribution;
 
-/// Represents the result of an AI health assessment.
+  const TriggeredRule({
+    required this.id,
+    required this.name,
+    required this.reason,
+    required this.scoreContribution,
+  });
+
+  factory TriggeredRule.fromJson(Map<String, dynamic> json) {
+    return TriggeredRule(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      reason: json['reason'] as String,
+      scoreContribution: json['score_contribution'] as int,
+    );
+  }
+}
+
+/// Represents the result of an AI health assessment from the deterministic rule engine.
 class Assessment {
-  final String urgencyTitle;
-  final String urgencyDescription;
-  final int score;
-  final double confidence;
-  final String timeframe;
-  final String recommendationTitle;
-  final String recommendationDescription;
-  final List<Condition> conditions;
-  final List<String> reasoningPoints;
-  final List<SelfCareItem> selfCareItems;
+  final int riskScore;
+  final String riskLevel;
+  final List<String> recommendations;
+  final bool referralRequired;
+  final bool emergency;
+  final String followUp;
+  final List<TriggeredRule> triggeredRules;
+  final String disclaimer;
 
   const Assessment({
-    required this.urgencyTitle,
-    required this.urgencyDescription,
-    required this.score,
-    required this.confidence,
-    required this.timeframe,
-    required this.recommendationTitle,
-    required this.recommendationDescription,
-    required this.conditions,
-    required this.reasoningPoints,
-    required this.selfCareItems,
+    required this.riskScore,
+    required this.riskLevel,
+    required this.recommendations,
+    required this.referralRequired,
+    required this.emergency,
+    required this.followUp,
+    required this.triggeredRules,
+    required this.disclaimer,
   });
 
   factory Assessment.fromJson(Map<String, dynamic> json) {
+    final resultsList = json['results'] as List<dynamic>? ?? [];
+    if (resultsList.isEmpty) {
+      throw Exception('Assessment response contains no results');
+    }
+    
+    final result = resultsList.first as Map<String, dynamic>;
+
     return Assessment(
-      urgencyTitle: json['urgency_title'] as String,
-      urgencyDescription: json['urgency_description'] as String,
-      score: json['score'] as int,
-      confidence: (json['confidence'] as num).toDouble(),
-      timeframe: json['timeframe'] as String,
-      recommendationTitle: json['recommendation_title'] as String,
-      recommendationDescription: json['recommendation_description'] as String,
-      conditions: (json['conditions'] as List<dynamic>)
-          .map((c) => Condition.fromJson(c as Map<String, dynamic>))
-          .toList(),
-      reasoningPoints:
-          (json['reasoning_points'] as List<dynamic>).cast<String>(),
-      selfCareItems: (json['self_care_items'] as List<dynamic>)
-          .map((s) => SelfCareItem.fromJson(s as Map<String, dynamic>))
-          .toList(),
+      riskScore: result['risk_score'] as int,
+      riskLevel: result['risk_level'] as String,
+      recommendations: (result['recommendations'] as List<dynamic>?)?.cast<String>() ?? [],
+      referralRequired: result['referral_required'] as bool? ?? false,
+      emergency: result['emergency'] as bool? ?? false,
+      followUp: result['follow_up'] as String? ?? '',
+      triggeredRules: (result['triggered_rules'] as List<dynamic>?)
+              ?.map((r) => TriggeredRule.fromJson(r as Map<String, dynamic>))
+              .toList() ??
+          [],
+      disclaimer: result['disclaimer'] as String? ?? '',
     );
   }
 }
-
-/// Self-care recommendation item.
-class SelfCareItem {
-  final String label;
-  final String iconName;
-
-  const SelfCareItem({required this.label, required this.iconName});
-
-  factory SelfCareItem.fromJson(Map<String, dynamic> json) {
-    return SelfCareItem(
-      label: json['label'] as String,
-      iconName: json['icon_name'] as String,
-    );
-  }
-}
-

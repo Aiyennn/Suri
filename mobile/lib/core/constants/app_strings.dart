@@ -21,7 +21,7 @@ abstract final class AppStrings {
   static const String age = 'Age';
   static const String enterAge = 'Enter age';
   static const String years = 'Years';
-  static const String sexAtBirth = 'Sex at Birth';
+  static const String sexAtBirth = 'Sex';
   static const String male = 'Male';
   static const String female = 'Female';
   static const String other = 'Other';
