@@ -6,11 +6,16 @@ import '../../features/assessment/presentation/pages/analyzing_page.dart';
 import '../../features/assessment/presentation/pages/patient_details_page.dart';
 import '../../features/assessment/presentation/pages/results_page.dart';
 import '../../features/assessment/presentation/pages/upload_images_page.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/shell/presentation/pages/shell_page.dart';
 
 /// Route paths.
 abstract final class RoutePaths {
+  static const String login = '/login';
+  static const String register = '/register';
   static const String home = '/';
   static const String assessments = '/assessments';
   static const String history = '/history';
@@ -21,12 +26,52 @@ abstract final class RoutePaths {
   static const String results = '/assessment/results';
 }
 
+/// Routes that don't require authentication.
+const _publicRoutes = {RoutePaths.login, RoutePaths.register};
+
 /// GoRouter configuration provider.
+///
+/// Uses [RouterNotifier] to safely bridge Riverpod auth state into
+/// GoRouter's [refreshListenable] without calling ref.listen inside
+/// a non-widget context.
 final routerProvider = Provider<GoRouter>((ref) {
+  final notifier = ref.watch(_routerNotifierProvider.notifier);
+
   return GoRouter(
     initialLocation: RoutePaths.home,
+    refreshListenable: notifier,
+
+    // ── Redirect guard ─────────────────────────────────────────────────────
+    redirect: (context, state) {
+      final authState = ref.read(authProvider);
+      final isPublic = _publicRoutes.contains(state.matchedLocation);
+
+      // Still checking stored token — don't redirect yet.
+      if (authState is AuthLoading) return null;
+
+      final isAuthed = authState is AuthAuthenticated;
+
+      // Unauthenticated user on a protected route → send to login.
+      if (!isAuthed && !isPublic) return RoutePaths.login;
+
+      // Authenticated user visiting login/register → send home.
+      if (isAuthed && isPublic) return RoutePaths.home;
+
+      return null;
+    },
+
     routes: [
-      // Shell route for bottom nav
+      // ── Auth routes (no shell / no bottom nav) ─────────────────────────
+      GoRoute(
+        path: RoutePaths.login,
+        builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.register,
+        builder: (context, state) => const RegisterPage(),
+      ),
+
+      // ── Shell route for bottom nav ─────────────────────────────────────
       ShellRoute(
         builder: (context, state, child) => ShellPage(child: child),
         routes: [
@@ -56,7 +101,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      // Assessment flow (no bottom nav)
+
+      // ── Assessment flow (no bottom nav) ───────────────────────────────
       GoRoute(
         path: RoutePaths.patientDetails,
         builder: (context, state) => const PatientDetailsPage(),
@@ -77,7 +123,39 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Placeholder page for stub tabs.
+// ── Router notifier ──────────────────────────────────────────────────────────
+
+/// Internal provider that bridges [authProvider] changes to GoRouter's
+/// [refreshListenable] using a proper [Notifier] — this avoids the crash
+/// caused by calling ref.listen inside a plain Provider body.
+final _routerNotifierProvider =
+    NotifierProvider<RouterNotifier, void>(RouterNotifier.new);
+
+class RouterNotifier extends Notifier<void> implements Listenable {
+  VoidCallback? _routerListener;
+
+  @override
+  void build() {
+    // Watch the auth provider so this notifier rebuilds on auth changes,
+    // which in turn calls notifyListeners() → GoRouter re-evaluates redirect.
+    ref.listen<AuthState>(authProvider, (_, _) {
+      _routerListener?.call();
+    });
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    _routerListener = listener;
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _routerListener = null;
+  }
+}
+
+// ── Placeholder page ──────────────────────────────────────────────────────────
+
 class _PlaceholderPage extends StatelessWidget {
   final String title;
   const _PlaceholderPage({required this.title});
@@ -100,10 +178,7 @@ class _PlaceholderPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Coming soon',
-              style: TextStyle(color: Colors.grey[400]),
-            ),
+            Text('Coming soon', style: TextStyle(color: Colors.grey[400])),
           ],
         ),
       ),

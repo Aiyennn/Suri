@@ -3,6 +3,8 @@ import 'dart:developer' as developer;
 
 import 'package:http/http.dart' as http;
 
+import '../../../../core/constants/api_constants.dart';
+
 import '../../domain/entities/assessment.dart';
 import '../../domain/entities/patient.dart';
 import '../../domain/repositories/assessment_repository.dart';
@@ -12,11 +14,8 @@ import '../../domain/repositories/assessment_repository.dart';
 class AssessmentRepositoryImpl implements AssessmentRepository {
   // ─── Configuration ───────────────────────────────────────────────────────
 
-  /// Base URL for the Suri backend.
-  static const String _baseUrl = 'http://localhost:8000';
-
   /// Wound analysis endpoint.
-  static const String _woundEndpoint = '/wound/analyze';
+  static const String _woundEndpoint = ApiConstants.woundAnalyze;
 
   final http.Client _client;
 
@@ -30,7 +29,7 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
     required Patient patient,
     required List<String> imagePaths,
   }) async {
-    final uri = Uri.parse('$_baseUrl$_woundEndpoint');
+    final uri = Uri.parse('${ApiConstants.baseUrl}$_woundEndpoint');
 
     // 1. Build a multipart POST request.
     final request = http.MultipartRequest('POST', uri);

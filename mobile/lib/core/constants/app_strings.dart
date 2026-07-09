@@ -100,4 +100,29 @@ abstract final class AppStrings {
   static const String assessments = 'Assessments';
   static const String history = 'History';
   static const String profile = 'Profile';
+
+  // Auth — Login
+  static const String welcomeBack = 'Welcome back';
+  static const String loginSubtitle = 'Sign in to continue your AI health assessments.';
+  static const String signIn = 'Sign In';
+  static const String noAccount = "Don't have an account?";
+  static const String signUp = 'Sign Up';
+
+  // Auth — Register
+  static const String createAccountTitle = 'Create account';
+  static const String registerSubtitle = 'Join Suri and get AI-powered wound assessments.';
+  static const String createAccount = 'Create Account';
+  static const String haveAccount = 'Already have an account?';
+  static const String optionalInfo = 'Optional Information';
+
+  // Auth — Shared field labels
+  static const String emailLabel = 'Email address';
+  static const String emailHint = 'you@example.com';
+  static const String passwordLabel = 'Password';
+  static const String passwordHint = 'Min. 8 characters';
+  static const String confirmPasswordLabel = 'Confirm password';
+  static const String confirmPasswordHint = 'Re-enter your password';
+  static const String fullNameLabel = 'Full name';
+  static const String fullNameHint = 'Jane Doe';
 }
+

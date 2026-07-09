@@ -1,11 +1,18 @@
+"""
+dependencies.py
+===============
+Shared FastAPI dependency functions used across all routers.
+"""
+
 from collections.abc import Generator
 
 from sqlalchemy.orm import Session
 
-from app.core.database import SessionLocal
+from core.database import SessionLocal
 
 
 def get_db() -> Generator[Session, None, None]:
+    """Yield a SQLAlchemy session and close it after the request."""
     db = SessionLocal()
 
     try:

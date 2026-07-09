@@ -35,5 +35,10 @@ class Settings(BaseSettings):
     APP_NAME: str = "Suri"
     DEBUG: bool = True
 
+    # ── Auth / JWT ────────────────────────────────────────────────────────
+    SECRET_KEY: str = "change-me-in-production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
 
 settings = Settings()

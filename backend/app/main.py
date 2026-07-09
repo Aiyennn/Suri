@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from api.auth import router as auth_router
 from api.wound import router as wound_router
 from core.database import engine, Base
 
@@ -62,7 +63,9 @@ app = FastAPI(
 # Router registration
 # ---------------------------------------------------------------------------
 
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(wound_router, prefix="/wound", tags=["wound"])
+
 
 
 # ---------------------------------------------------------------------------
