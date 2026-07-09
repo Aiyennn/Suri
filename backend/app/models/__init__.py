@@ -1,0 +1,25 @@
+"""
+models/__init__.py
+==================
+Re-exports all SQLAlchemy ORM models for convenient imports::
+
+    from models import User, WoundAssessment, WoundImage
+
+Importing this package also ensures every model class is registered
+with the ``Base`` metadata, which is required for Alembic migrations
+and ``Base.metadata.create_all()`` calls.
+"""
+
+from models.user import User
+from models.wound_assessment import WoundAssessment
+from models.wound_image import WoundImage
+from models.image_quality_result import ImageQualityResult
+from models.analysis_result import WoundAnalysisDBResult
+
+__all__ = [
+    "User",
+    "WoundAssessment",
+    "WoundImage",
+    "ImageQualityResult",
+    "WoundAnalysisDBResult",
+]
