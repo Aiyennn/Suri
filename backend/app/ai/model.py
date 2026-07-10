@@ -20,7 +20,7 @@ def analyze_wound(image) -> dict:
     **Current behaviour (stub):**
     Returns randomly generated predictions that match the expected
     production response schema. This allows the API and downstream
-    recommendation engine to be developed before the ML model is ready.
+    recommendation engine to be developed before the ML model is ready. 
 
     **Expected production behaviour:**
     Accept a NumPy BGR image, run it through the wound classification model,
@@ -42,50 +42,70 @@ def analyze_wound(image) -> dict:
     """
     logging.info("Model analyzing wound")
 
+    wound_type = random.choice([
+        "abrasion",
+        "laceration",
+        "burn",
+        "pressure_ulcer",
+        "diabetic_ulcer",
+    ])
+
+    severity = random.choice([
+        "mild",
+        "moderate",
+        "severe",
+    ])
+
+    healing_stage = random.choice([
+        "hemostasis",
+        "inflammatory",
+        "proliferative",
+        "maturation",
+    ])
+
+    bleeding = random.choice([
+        "none",
+        "minimal",
+        "moderate",
+        "heavy",
+    ])
+
+    redness = random.choice([True, False])
+
+    # Generate exudate consistently
+    exudate_present = random.choice([True, False])
+
+    if exudate_present:
+        exudate = {
+            "present": True,
+            "type": random.choice([
+                "serous",
+                "sanguineous",
+                "serosanguineous",
+            ]),
+            "amount": random.choice([
+                "low",
+                "moderate",
+                "high",
+            ]),
+        }
+    else:
+        exudate = {
+            "present": False,
+            "type": "none",
+            "amount": "none",
+        }
+
     return {
         "classification": {
-            "wound_type": random.choice([
-                "abrasion",
-                "laceration",
-                "burn",
-                "pressure_ulcer",
-                "diabetic_ulcer",
-            ]),
-            "severity": random.choice([
-                "mild",
-                "moderate",
-                "severe",
-            ]),
-            "healing_stage": random.choice([
-                "hemostasis",
-                "inflammatory",
-                "proliferative",
-                "maturation",
-            ]),
+            "wound_type": wound_type,
+            "severity": severity,
+            "healing_stage": healing_stage,
         },
         "observations": {
-            "redness": random.choice([True, False]),
-            "bleeding": random.choice([
-                "none",
-                "minimal",
-                "moderate",
-                "heavy",
-            ]),
-            "exudate": {
-                "present": random.choice([True, False]),
-                "type": random.choice([
-                    "none",
-                    "serous",
-                    "sanguineous",
-                    "serosanguineous",
-                ]),
-                "amount": random.choice([
-                    "none",
-                    "low",
-                    "moderate",
-                    "high",
-                ]),
-            },
+            "redness": redness,
+            "bleeding": bleeding,
+            "exudate": exudate,
         },
         "confidence": round(random.uniform(0.80, 0.99), 2),
     }
