@@ -15,4 +15,5 @@ abstract final class ApiConstants {
 
   // ── Wound endpoints ───────────────────────────────────────────────────
   static const String woundAnalyze = '/wound/analyze';
+  static const String woundAssessments = '/wound/assessments';
 }

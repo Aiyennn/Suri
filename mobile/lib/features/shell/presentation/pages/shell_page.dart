@@ -23,7 +23,7 @@ class ShellPage extends StatelessWidget {
       case 0:
         context.go(RoutePaths.home);
       case 1:
-        context.push(RoutePaths.patientDetails);
+        context.go(RoutePaths.assessments);
       case 2:
         context.go(RoutePaths.history);
       case 3:

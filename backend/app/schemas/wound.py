@@ -234,3 +234,33 @@ class WoundAnalysisResponse(BaseModel):
             "in the same order as the submitted files."
         ),
     )
+
+# ---------------------------------------------------------------------------
+# Assessment history schemas
+# ---------------------------------------------------------------------------
+
+class AssessmentSummary(BaseModel):
+    """
+    Lightweight summary of one past assessment session, used for list views.
+    """
+
+    id: str = Field(description="UUID of the assessment session.")
+    created_at: str = Field(description="ISO-8601 timestamp when the assessment was created.")
+    patient_age: str = Field(description="Patient age as stored.")
+    patient_sex: str = Field(description="Patient biological sex.")
+    symptoms: List[str] = Field(description="List of reported symptoms.")
+    duration: str = Field(description="Wound duration string.")
+
+    # Summary of the first image's analysis result (if any)
+    risk_level: str | None = Field(None, description="Risk level from the first image's analysis.")
+    risk_score: int | None = Field(None, description="Risk score from the first image's analysis.")
+    wound_type: str | None = Field(None, description="Wound type from the first image's analysis.")
+    emergency: bool | None = Field(None, description="Emergency flag from the first image's analysis.")
+    image_count: int = Field(0, description="Number of images uploaded in this session.")
+
+
+class AssessmentListResponse(BaseModel):
+    """Paginated list of past assessment summaries."""
+
+    total: int = Field(description="Total number of assessments on record.")
+    assessments: List[AssessmentSummary] = Field(description="Ordered list of assessment summaries (newest first).")

@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/assessment/presentation/pages/analyzing_page.dart';
+import '../../features/assessment/presentation/pages/assessments_page.dart';
+import '../../features/assessment/presentation/pages/history_page.dart';
 import '../../features/assessment/presentation/pages/patient_details_page.dart';
 import '../../features/assessment/presentation/pages/results_page.dart';
 import '../../features/assessment/presentation/pages/upload_images_page.dart';
@@ -84,13 +86,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePaths.assessments,
             pageBuilder: (context, state) => const NoTransitionPage(
-              child: _PlaceholderPage(title: 'Assessments'),
+              child: AssessmentsPage(),
             ),
           ),
           GoRoute(
             path: RoutePaths.history,
             pageBuilder: (context, state) => const NoTransitionPage(
-              child: _PlaceholderPage(title: 'History'),
+              child: HistoryPage(),
             ),
           ),
           GoRoute(

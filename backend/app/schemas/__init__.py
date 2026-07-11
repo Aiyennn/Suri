@@ -16,6 +16,8 @@ from schemas.wound import (
     WoundAnalysisResult,
     ImageAnalysisResult,
     WoundAnalysisResponse,
+    AssessmentSummary,
+    AssessmentListResponse,
 )
 
 __all__ = [
@@ -26,4 +28,6 @@ __all__ = [
     "WoundAnalysisResult",
     "ImageAnalysisResult",
     "WoundAnalysisResponse",
+    "AssessmentSummary",
+    "AssessmentListResponse",
 ]
