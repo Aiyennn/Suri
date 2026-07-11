@@ -13,8 +13,9 @@ automatic OpenAPI documentation via FastAPI.
 
 from __future__ import annotations
 
+import json
 from typing import List, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 # ---------------------------------------------------------------------------
@@ -29,7 +30,7 @@ class PatientInfo(BaseModel):
         description="Patient age, e.g. '34' or '34 years'.",
         examples=["34"],
     )
-    sex: str = Field(
+    sex: Literal["male", "female", "other"] = Field(
         ...,
         description="Patient biological sex: 'male', 'female', or 'other'.",
         examples=["female"],
@@ -49,6 +50,17 @@ class PatientInfo(BaseModel):
         description="Relevant past medical conditions, allergies, or medications.",
         examples=["Type 2 diabetes, penicillin allergy"],
     )
+
+    @field_validator("symptoms", mode="before")
+    @classmethod
+    def parse_symptoms(cls, v: object) -> object:
+        """Accept a JSON-encoded string (from multipart form) or a plain list."""
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                raise ValueError("symptoms must be a valid JSON list, e.g. '[\"redness\"]'")
+        return v
 
 
 # ---------------------------------------------------------------------------
@@ -114,32 +126,46 @@ class ImageQualityAssessment(BaseModel):
     )
 
 
+class TriggeredRule(BaseModel):
+    """Compact record of one rule that fired during evaluation."""
+
+    id: str = Field(description="Unique rule identifier.")
+    name: str = Field(description="Human-readable rule name.")
+    reason: str = Field(description="Plain-language explanation of why the rule fired.")
+    score_contribution: int = Field(description="Points this rule added to the risk score.")
+
+
 class WoundAnalysisResult(BaseModel):
     """
-    AI model output for a single wound image.
+    Full deterministic output produced by the rule engine for a single image.
 
-    The model currently returns a categorical risk level and an associated
-    confidence score.  Additional fields (e.g. wound classification, size
-    estimate) will be added here as the model matures.
+    Mirrors ``engine.models.AssessmentResult`` so that the API response
+    accurately reflects what the engine computed.
     """
 
-    risk: Literal["low", "medium", "high"] = Field(
-        ...,
-        description=(
-            "Predicted risk level of the wound.  "
-            "'high' should prompt immediate clinical escalation."
-        ),
-        examples=["medium"],
+    risk_score: int = Field(description="Cumulative integer risk score.")
+    risk_level: str = Field(
+        description="Categorical risk tier: 'Low', 'Moderate', 'High', or 'Critical'.",
+        examples=["Moderate"],
     )
-    confidence: float = Field(
-        ...,
-        ge=0.0,
-        le=1.0,
-        description=(
-            "Model confidence in the risk prediction, expressed as a "
-            "probability between 0.0 and 1.0."
-        ),
-        examples=[0.87],
+    recommendations: List[str] = Field(
+        description="Ordered, deduplicated action items for the clinician."
+    )
+    referral_required: bool = Field(
+        description="Whether healthcare-provider referral is advised."
+    )
+    emergency: bool = Field(
+        description="Whether an emergency response may be warranted."
+    )
+    follow_up: str = Field(
+        description="Recommended follow-up timeframe.",
+        examples=["Review in 48 hours"],
+    )
+    triggered_rules: List[TriggeredRule] = Field(
+        description="All rules that matched and contributed to this assessment."
+    )
+    disclaimer: str = Field(
+        description="Mandatory clinical-safety disclaimer."
     )
 
 
@@ -157,7 +183,7 @@ class ImageAnalysisResult(BaseModel):
     )
     analysis: WoundAnalysisResult = Field(
         ...,
-        description="AI model prediction for this image.",
+        description="Rule-engine assessment for this image.",
     )
 
 
@@ -180,7 +206,7 @@ class WoundAnalysisResponse(BaseModel):
     results: List[WoundAnalysisResult] = Field(
         ...,
         description=(
-            "List of AI analysis results, one per uploaded image, "
+            "List of rule-engine assessment results, one per uploaded image, "
             "in the same order as the submitted files."
         ),
     )
