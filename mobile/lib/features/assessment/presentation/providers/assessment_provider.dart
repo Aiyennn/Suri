@@ -31,6 +31,19 @@ class AssessmentState {
   final bool isAnalyzing;
   final String? error;
 
+  // ── Upload progress fields ─────────────────────────────────────────────
+  /// Whether images are currently being uploaded to the server.
+  final bool isUploading;
+
+  /// Upload progress as a fraction in [0.0, 1.0].
+  final double uploadProgress;
+
+  /// Number of bytes sent so far during the current upload.
+  final int uploadedBytes;
+
+  /// Total number of bytes to send during the current upload.
+  final int totalBytes;
+
   const AssessmentState({
     this.patient = const Patient(),
     this.uploadedImagePaths = const [],
@@ -41,6 +54,10 @@ class AssessmentState {
     this.result,
     this.isAnalyzing = false,
     this.error,
+    this.isUploading = false,
+    this.uploadProgress = 0.0,
+    this.uploadedBytes = 0,
+    this.totalBytes = 0,
   });
 
   AssessmentState copyWith({
@@ -53,6 +70,10 @@ class AssessmentState {
     Assessment? result,
     bool? isAnalyzing,
     String? error,
+    bool? isUploading,
+    double? uploadProgress,
+    int? uploadedBytes,
+    int? totalBytes,
   }) {
     return AssessmentState(
       patient: patient ?? this.patient,
@@ -64,6 +85,10 @@ class AssessmentState {
       result: result ?? this.result,
       isAnalyzing: isAnalyzing ?? this.isAnalyzing,
       error: error,
+      isUploading: isUploading ?? this.isUploading,
+      uploadProgress: uploadProgress ?? this.uploadProgress,
+      uploadedBytes: uploadedBytes ?? this.uploadedBytes,
+      totalBytes: totalBytes ?? this.totalBytes,
     );
   }
 }
@@ -150,51 +175,97 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
 
   // ─── Analysis ───
 
-  /// Simulate the analysis pipeline step by step.
+  /// Run the full analysis pipeline:
+  ///   Phase 1 — Upload images to the server (real progress tracking).
+  ///   Phase 2 — Animate analysis steps while the API processes.
   Future<void> startAnalysis() async {
     state = state.copyWith(
       isAnalyzing: true,
+      isUploading: true,
+      uploadProgress: 0.0,
+      uploadedBytes: 0,
+      totalBytes: 0,
       analysisProgress: 0.0,
+      error: null,
       stepStatuses: {
         for (final step in AnalysisStep.values) step: StepStatus.pending,
       },
     );
 
-    // Simulate each step
-    for (int i = 0; i < AnalysisStep.values.length; i++) {
-      final step = AnalysisStep.values[i];
-
-      // Mark current step as running
-      final statuses = Map<AnalysisStep, StepStatus>.from(state.stepStatuses);
-      statuses[step] = StepStatus.running;
-      state = state.copyWith(
-        stepStatuses: statuses,
-        currentAnalysisStep: i,
-        analysisProgress: (i / AnalysisStep.values.length),
-      );
-
-      // Simulate processing time
-      await Future.delayed(Duration(milliseconds: 800 + (i * 200)));
-
-      // Mark step as completed
-      final updatedStatuses =
-          Map<AnalysisStep, StepStatus>.from(state.stepStatuses);
-      updatedStatuses[step] = StepStatus.completed;
-      state = state.copyWith(stepStatuses: updatedStatuses);
-    }
-
-    // Final progress
-    state = state.copyWith(analysisProgress: 1.0);
-
-    // Run the actual assessment
     try {
-      final result = await _runAssessment(
+      // Phase 1: Upload + API analysis — real progress via callback.
+      //
+      // The onUploadProgress callback fires as bytes are streamed to the
+      // server.  Once the upload completes, the server runs the analysis
+      // pipeline and returns the result.  The analysis steps are animated
+      // in parallel to give the user visual feedback during processing.
+      final analysisFuture = _runAssessment(
         patient: state.patient,
         imagePaths: state.uploadedImagePaths,
+        onUploadProgress: (sent, total) {
+          if (!mounted) return;
+          final progress = total > 0 ? (sent / total).clamp(0.0, 1.0) : 0.0;
+          state = state.copyWith(
+            uploadProgress: progress,
+            uploadedBytes: sent,
+            totalBytes: total,
+            // While uploading, mark upload as ongoing
+            isUploading: progress < 1.0,
+          );
+        },
       );
-      state = state.copyWith(result: result, isAnalyzing: false);
+
+      // Phase 2: Animate analysis steps while waiting for the result.
+      // Start the step animation after a small delay to let upload progress
+      // begin showing first.
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      // Animate each step
+      for (int i = 0; i < AnalysisStep.values.length; i++) {
+        if (!mounted) return;
+        final step = AnalysisStep.values[i];
+
+        // Mark current step as running
+        final statuses = Map<AnalysisStep, StepStatus>.from(state.stepStatuses);
+        statuses[step] = StepStatus.running;
+        state = state.copyWith(
+          stepStatuses: statuses,
+          currentAnalysisStep: i,
+          analysisProgress: (i / AnalysisStep.values.length),
+        );
+
+        // Simulate processing time
+        await Future.delayed(Duration(milliseconds: 800 + (i * 200)));
+
+        if (!mounted) return;
+
+        // Mark step as completed
+        final updatedStatuses =
+            Map<AnalysisStep, StepStatus>.from(state.stepStatuses);
+        updatedStatuses[step] = StepStatus.completed;
+        state = state.copyWith(stepStatuses: updatedStatuses);
+      }
+
+      // Final progress
+      state = state.copyWith(analysisProgress: 1.0);
+
+      // Wait for the actual API result
+      final result = await analysisFuture;
+
+      if (!mounted) return;
+      state = state.copyWith(
+        result: result,
+        isAnalyzing: false,
+        isUploading: false,
+        uploadProgress: 1.0,
+      );
     } catch (e) {
-      state = state.copyWith(error: e.toString(), isAnalyzing: false);
+      if (!mounted) return;
+      state = state.copyWith(
+        error: e.toString(),
+        isAnalyzing: false,
+        isUploading: false,
+      );
     }
   }
 

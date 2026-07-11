@@ -140,9 +140,29 @@ class WoundAnalysisResult(BaseModel):
     Full deterministic output produced by the rule engine for a single image.
 
     Mirrors ``engine.models.AssessmentResult`` so that the API response
-    accurately reflects what the engine computed.
+    accurately reflects what the engine computed.  Also includes the AI
+    classification fields that were used as input to the rule engine.
     """
 
+    # ── AI classification ─────────────────────────────────────────────────
+    wound_type: str = Field(
+        description="Wound morphology category from classification.",
+        examples=["laceration"],
+    )
+    severity: str = Field(
+        description="Clinician-interpretable severity tier.",
+        examples=["moderate"],
+    )
+    healing_stage: str = Field(
+        description="Current wound-healing phase.",
+        examples=["inflammatory"],
+    )
+    confidence: float = Field(
+        description="AI model confidence score in [0.0, 1.0].",
+        examples=[0.87],
+    )
+
+    # ── Rule-engine output ────────────────────────────────────────────────
     risk_score: int = Field(description="Cumulative integer risk score.")
     risk_level: str = Field(
         description="Categorical risk tier: 'Low', 'Moderate', 'High', or 'Critical'.",
@@ -195,10 +215,14 @@ class WoundAnalysisResponse(BaseModel):
     """
     Complete response body for POST /wound/analyze.
 
-    Contains the echoed patient information and one analysis result per
-    uploaded image.
+    Contains the assessment ID for future reference, the echoed patient
+    information, and one analysis result per uploaded image.
     """
 
+    assessment_id: str = Field(
+        ...,
+        description="UUID of the persisted assessment session.",
+    )
     patient: PatientInfo = Field(
         ...,
         description="Patient demographics and clinical context as submitted.",

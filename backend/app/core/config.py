@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "Suri"
     DEBUG: bool = True
 
+    # ── File storage ─────────────────────────────────────────────────────
+    UPLOAD_DIR: str = str(BASE_DIR / "uploads")
+
     # ── Auth / JWT ────────────────────────────────────────────────────────
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"

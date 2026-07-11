@@ -105,7 +105,11 @@ class UploadImagesPage extends ConsumerWidget {
 
                   // Upload progress (show when there are images)
                   if (state.uploadedImagePaths.isNotEmpty) ...[
-                    const UploadProgress(uploadedMb: 3, totalMb: 5),
+                    UploadProgress(
+                      progress: state.uploadProgress,
+                      uploadedBytes: state.uploadedBytes,
+                      totalBytes: state.totalBytes,
+                    ),
                     const SizedBox(height: AppSpacing.xl),
 
                     // Preview section
