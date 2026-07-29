@@ -10,11 +10,12 @@ with the ``Base`` metadata, which is required for Alembic migrations
 and ``Base.metadata.create_all()`` calls.
 """
 
-from models.user import User
-from models.wound_assessment import WoundAssessment
-from models.wound_image import WoundImage
-from models.image_quality_result import ImageQualityResult
-from models.analysis_result import WoundAnalysisDBResult
+from app.db.database import Base
+from app.models.user import User
+from app.models.wound_assessment import WoundAssessment
+from app.models.wound_image import WoundImage
+from app.models.image_quality_result import ImageQualityResult
+from app.models.analysis_result import WoundAnalysisDBResult
 
 __all__ = [
     "User",

@@ -13,7 +13,7 @@ from sqlalchemy import Boolean, Column, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from core.database import Base
+from app.db.database import Base
 
 
 class ImageQualityResult(Base):

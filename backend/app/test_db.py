@@ -1,6 +1,6 @@
 from sqlalchemy import text
-from core.database import engine
-from core.config import settings
+from app.db import engine
+from app.core.config import settings
 
 print(settings.DATABASE_URL)
 

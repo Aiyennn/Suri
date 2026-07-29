@@ -18,7 +18,7 @@ from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, St
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import relationship
 
-from core.database import Base
+from app.db.database import Base
 
 
 class WoundAnalysisDBResult(Base):

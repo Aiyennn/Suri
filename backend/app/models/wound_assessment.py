@@ -15,7 +15,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import relationship
 
-from core.database import Base
+from app.db.database import Base
 
 
 class WoundAssessment(Base):
