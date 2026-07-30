@@ -9,8 +9,8 @@ including edge cases at exact boundary values.
 
 import pytest
 
-from engine.models import RiskLevel
-from engine.scoring import RiskScorer, SCORE_THRESHOLDS
+from app.engine.models import RiskLevel
+from app.engine.scoring import RiskScorer, SCORE_THRESHOLDS
 
 
 class TestRiskScorer:

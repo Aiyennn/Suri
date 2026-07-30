@@ -7,9 +7,9 @@ Unit tests for ``engine/followup.py``.
 import pytest
 from typing import Optional
 
-from engine.evaluator import EvaluationResult
-from engine.followup import FollowUpScheduler, _hours_to_label
-from engine.models import RiskLevel
+from app.engine.evaluator import EvaluationResult
+from app.engine.followup import FollowUpScheduler, _hours_to_label
+from app.engine.models import RiskLevel
 
 
 # ---------------------------------------------------------------------------

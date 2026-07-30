@@ -9,7 +9,7 @@ one rule condition and asserts the condition evaluates as expected.
 
 import pytest
 
-from engine.models import (
+from app.engine.models import (
     BleedingLevel,
     Classification,
     ExudateAmount,
@@ -21,7 +21,7 @@ from engine.models import (
     WoundAssessmentInput,
     WoundType,
 )
-from engine.registry import rule_registry
+from app.engine.registry import rule_registry
 
 
 # ---------------------------------------------------------------------------

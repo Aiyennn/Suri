@@ -18,9 +18,9 @@ import json
 
 import pytest
 
-from engine.engine import WoundAssessmentEngine
-from engine.models import RiskLevel
-from engine.validation import InputValidationError
+from app.engine.engine import WoundAssessmentEngine
+from app.engine.models import RiskLevel
+from app.engine.validation import InputValidationError
 
 
 # ---------------------------------------------------------------------------

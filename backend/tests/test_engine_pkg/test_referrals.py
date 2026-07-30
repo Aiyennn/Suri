@@ -8,9 +8,9 @@ import pytest
 from dataclasses import dataclass, field
 from typing import Optional
 
-from engine.evaluator import EvaluationResult, RuleMatch
-from engine.models import RiskLevel
-from engine.referrals import ReferralEngine
+from app.engine.evaluator import EvaluationResult, RuleMatch
+from app.engine.models import RiskLevel
+from app.engine.referrals import ReferralEngine
 
 
 # ---------------------------------------------------------------------------

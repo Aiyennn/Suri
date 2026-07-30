@@ -10,7 +10,7 @@ consistency cross-validator.
 import pytest
 from pydantic import ValidationError
 
-from engine.models import (
+from app.engine.models import (
     AssessmentResult,
     BleedingLevel,
     Classification,

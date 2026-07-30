@@ -9,8 +9,8 @@ aggregation logic without depending on the full built-in rule set.
 
 import pytest
 
-from engine.evaluator import EvaluationResult, RuleEvaluator
-from engine.models import (
+from app.engine.evaluator import EvaluationResult, RuleEvaluator
+from app.engine.models import (
     BleedingLevel,
     Classification,
     ExudateAmount,
@@ -22,8 +22,8 @@ from engine.models import (
     WoundAssessmentInput,
     WoundType,
 )
-from engine.registry import RuleRegistry
-from engine.rules import Rule
+from app.engine.registry import RuleRegistry
+from app.engine.rules import Rule
 
 
 # ---------------------------------------------------------------------------
