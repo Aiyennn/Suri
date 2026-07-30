@@ -35,17 +35,17 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 import logging
 
-from core.config import settings
-from dependencies import get_db
-from models.wound_assessment import WoundAssessment
-from schemas.wound import (
+from app.core.config import settings
+from app.dependencies import get_db
+from app.models.wound_assessment import WoundAssessment
+from app.schemas.wound import (
     PatientInfo,
     WoundAnalysisResult,
     WoundAnalysisResponse,
     AssessmentSummary,
     AssessmentListResponse,
 )
-from services.wound_services import analyze_wound_image
+from app.services.wound_services import analyze_wound_image
 
 logger = logging.getLogger(__name__)
 
@@ -241,9 +241,9 @@ def list_assessments(
     Returns:
         AssessmentListResponse containing total count and list of summaries.
     """
-    from models.wound_assessment import WoundAssessment
-    from models.wound_image import WoundImage
-    from models.analysis_result import WoundAnalysisDBResult
+    from app.models.wound_assessment import WoundAssessment
+    from app.models.wound_image import WoundImage
+    from app.models.analysis_result import WoundAnalysisDBResult
     from sqlalchemy import func
 
     # Total count

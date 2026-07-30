@@ -9,8 +9,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from api.auth import router as auth_router
-from api.wound import router as wound_router
+from app.api.auth import router as auth_router
+from app.api.wound import router as wound_router
 
 logging.basicConfig(
     level=logging.DEBUG,

@@ -16,7 +16,7 @@ quality checks:
                        Low contrast flattens wound-vs-healthy-tissue differences.
 """
 
-from utils.image_processing import (
+from app.utils.image_processing import (
     blur_score,
     brightness_score,
     contrast_score,

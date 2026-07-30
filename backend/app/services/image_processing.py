@@ -11,7 +11,7 @@ model can consume.
 import numpy as np
 import cv2
 import logging
-from exceptions import InvalidImageError
+from app.exceptions import InvalidImageError
 
 logger = logging.getLogger(__name__)
 

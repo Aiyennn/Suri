@@ -28,10 +28,10 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from core.config import settings
-from dependencies import get_db
-from models.user import User
-from schemas.auth import UserRegisterRequest
+from app.core.config import settings
+from app.dependencies import get_db
+from app.models.user import User
+from app.schemas.auth import UserRegisterRequest
 
 # ---------------------------------------------------------------------------
 # Password hashing — using bcrypt directly

@@ -8,7 +8,7 @@ Import from this package to access request and response models:
     from schemas import WoundAnalysisResponse, PatientInfo
 """
 
-from schemas.wound import (
+from app.schemas.wound import (
     PatientInfo,
     ImageQualityMetrics,
     ImageQualityAssessment,

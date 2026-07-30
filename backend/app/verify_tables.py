@@ -3,8 +3,8 @@ Quick verification: create all tables via the direct Supabase connection,
 then list what was created.
 """
 from sqlalchemy import create_engine, inspect, text
-from core.config import settings
-from core.database import Base
+from app.core.config import settings
+from app.db.database import Base
 
 # Import all models so they register with Base.metadata
 import models  # noqa: F401

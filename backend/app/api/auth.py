@@ -16,16 +16,16 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from dependencies import get_db
-from models.user import User
-from schemas.auth import (
+from app.dependencies import get_db
+from app.models.user import User
+from app.schemas.auth import (
     AuthResponse,
     TokenResponse,
     UserLoginRequest,
     UserRegisterRequest,
     UserResponse,
 )
-from services.auth_service import (
+from app.services.auth_service import (
     authenticate_user,
     create_access_token,
     get_current_user,

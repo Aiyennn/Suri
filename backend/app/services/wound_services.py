@@ -24,14 +24,14 @@ import logging
 
 from sqlalchemy.orm import Session
 
-from services.image_quality import assess_image_quality
-from services.image_processing import process_image
-from ai.model import analyze_wound
-from engine import WoundAssessmentEngine
+from app.services.image_quality import assess_image_quality
+from app.services.image_processing import process_image
+from app.ai.model import analyze_wound
+from app.engine import WoundAssessmentEngine
 
-from models.wound_image import WoundImage
-from models.image_quality_result import ImageQualityResult
-from models.analysis_result import WoundAnalysisDBResult
+from app.models.wound_image import WoundImage
+from app.models.image_quality_result import ImageQualityResult
+from app.models.analysis_result import WoundAnalysisDBResult
 
 logger = logging.getLogger(__name__)
 
