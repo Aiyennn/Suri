@@ -59,9 +59,10 @@ class WoundAssessment(Base):
         doc="How long the wound has been present, e.g. '3 days'.",
     )
     medical_history = Column(
-        Text,
+        JSON,
         nullable=False,
-        doc="Relevant past medical conditions, allergies, or medications.",
+        default=list,
+        doc="List of relevant past medical conditions, allergies, or medications.",
     )
     created_at = Column(
         DateTime(timezone=True),

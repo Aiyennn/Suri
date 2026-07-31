@@ -25,53 +25,25 @@ Response shape (see schemas/wound.py for the full Pydantic models):
     }
 """
 
-import os
-import uuid
-from pathlib import Path
-from typing import List
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
-from pydantic import ValidationError
+from fastapi import APIRouter, Depends, UploadFile, File, Form
 from sqlalchemy.orm import Session
 import logging
 
-from app.core.config import settings
 from app.dependencies import get_db
 from app.models.wound_assessment import WoundAssessment
 from app.schemas.wound import (
-    PatientInfo,
-    WoundAnalysisResult,
     WoundAnalysisResponse,
     AssessmentSummary,
     AssessmentListResponse,
+    WoundAnalysisRequest
 )
-from app.services.wound_services import analyze_wound_image
+
+from app.services.wound_service import WoundService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-def _save_image_to_disk(image_bytes: bytes, assessment_id: uuid.UUID, filename: str) -> str:
-    """
-    Persist raw image bytes to the uploads directory.
-
-    Directory structure: ``<UPLOAD_DIR>/<assessment_id>/<filename>``
-
-    Returns the relative path string stored in the database.
-    """
-    assessment_dir = Path(settings.UPLOAD_DIR) / str(assessment_id)
-    assessment_dir.mkdir(parents=True, exist_ok=True)
-
-    # Ensure unique filenames by prepending a short UUID
-    unique_filename = f"{uuid.uuid4().hex[:8]}_{filename}"
-    file_path = assessment_dir / unique_filename
-
-    file_path.write_bytes(image_bytes)
-    logger.debug("Saved image to %s (%d bytes)", file_path, len(image_bytes))
-
-    # Store as a relative path from UPLOAD_DIR for portability
-    return str(Path(str(assessment_id)) / unique_filename)
 
 
 @router.post(
@@ -87,132 +59,21 @@ def _save_image_to_disk(image_bytes: bytes, assessment_id: uuid.UUID, filename: 
     ),
 )
 async def analyze_wound(
-    age: str = Form(..., description="Patient age, e.g. '34'."),
-    sex: str = Form(..., description="Patient biological sex: 'male', 'female', or 'other'."),
-    symptoms: str = Form(..., description="JSON-encoded list of symptom strings, e.g. '[\"redness\",\"swelling\"]'."),
-    duration: str = Form(..., description="Duration the wound has been present, e.g. '3 days'."),
-    medical_history: str = Form(..., description="Relevant past medical conditions or medications."),
-    images: List[UploadFile] = File(..., description="One or more wound images (JPEG or PNG)."),
-    db: Session = Depends(get_db),
+    request: WoundAnalysisRequest = Depends(WoundAnalysisRequest.from_form),
+    images: list[UploadFile] = File(...),
+    db: Session = Depends(get_db)
 ):
-    """
-    Analyse one or more wound images alongside patient context.
 
-    Processing pipeline per image:
-        1. Validate patient form fields against ``PatientInfo`` schema.
-        2. Create a ``WoundAssessment`` row with patient context.
-        3. Read raw bytes from each uploaded file and save to disk.
-        4. Decode the image and compute quality metrics (blur, brightness, contrast).
-        5. Reject the request with HTTP 400 if any image fails the quality gate.
-        6. Pass the decoded image to the AI model for observation/classification.
-        7. Run the deterministic rule engine to produce risk score, recommendations,
-           referral flag, emergency flag, and follow-up timing.
-        8. Persist all results (image, quality, analysis) to the database.
-        9. Commit the transaction and return the response.
+    service = WoundService(db)
 
-    Args:
-        age:             Patient age string.
-        sex:             Patient biological sex ('male', 'female', or 'other').
-        symptoms:        JSON-encoded list of symptom strings.
-        duration:        How long the wound has been present.
-        medical_history: Relevant medical background.
-        images:          Uploaded image files.
-        db:              SQLAlchemy session (injected).
-
-    Returns:
-        WoundAnalysisResponse: Assessment ID + validated patient info + one
-        assessment per image.
-
-    Raises:
-        HTTPException 422: If patient input fails schema validation.
-        HTTPException 400: If any image fails the quality gate.
-        HTTPException 500: For unexpected internal errors.
-    """
-    # ── Step 1: Validate patient input ────────────────────────────────────
     try:
-        patient = PatientInfo(
-            age=age,
-            sex=sex,
-            symptoms=symptoms,   # field_validator handles JSON decoding
-            duration=duration,
-            medical_history=medical_history,
-        )
-    except ValidationError as exc:
-        raise HTTPException(status_code=422, detail=exc.errors())
-
-    # ── Step 2: Create the assessment record ──────────────────────────────
-    try:
-        assessment_row = WoundAssessment(
-            patient_age=age,
-            patient_sex=sex,
-            symptoms=patient.symptoms,  # already parsed list
-            duration=duration,
-            medical_history=medical_history,
-        )
-        db.add(assessment_row)
-        db.flush()  # obtain assessment_row.id for FK references
-
-        assessment_id = assessment_row.id
-        logger.info("Created assessment %s", assessment_id)
-
-        # ── Steps 3-8: Process each image through the pipeline ────────────
-        image_results: List[WoundAnalysisResult] = []
-        for image in images:
-            image_bytes = await image.read()
-
-            # Save the image to disk
-            image_path = _save_image_to_disk(
-                image_bytes,
-                assessment_id,
-                image.filename or "wound_image.jpg",
-            )
-
-            # Run the analysis pipeline and persist results
-            result_dict = analyze_wound_image(
-                db=db,
-                image_bytes=image_bytes,
-                assessment_id=assessment_id,
-                image_path=image_path,
-                original_filename=image.filename,
-                content_type=image.content_type,
-                duration=duration,
-            )
-
-            # Validate and deserialize the engine output
-            image_results.append(WoundAnalysisResult.model_validate(result_dict))
-
-        # ── Step 9: Commit the transaction ────────────────────────────────
+        result = await service.analyze_wound(request, images)
         db.commit()
-        logger.info(
-            "Assessment %s committed (%d images)",
-            assessment_id,
-            len(image_results),
-        )
-
-        return WoundAnalysisResponse(
-            assessment_id=str(assessment_id),
-            patient=patient,
-            results=image_results,
-        )
-
-    except ValueError as exc:
-        # Raised by the image-quality gate or engine input validation
+        return result
+    except:
         db.rollback()
-        raise HTTPException(status_code=400, detail=str(exc))
-
-    except Exception:
-        db.rollback()
-        logger.exception(
-            "Unexpected error during wound analysis "
-            "(images=%d age=%s sex=%s)",
-            len(images),
-            age,
-            sex,
-        )
-        raise HTTPException(
-            status_code=500,
-            detail="Internal Server Error",
-        )
+        print("Wound Analysis Failed") # Change into custom error
+        raise
 
 
 @router.get(
@@ -242,8 +103,6 @@ def list_assessments(
         AssessmentListResponse containing total count and list of summaries.
     """
     from app.models.wound_assessment import WoundAssessment
-    from app.models.wound_image import WoundImage
-    from app.models.analysis_result import WoundAnalysisDBResult
     from sqlalchemy import func
 
     # Total count
