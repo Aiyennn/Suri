@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 from typing import List, Literal
 from pydantic import BaseModel, Field, field_validator
+from fastapi import Form
 
 
 # ---------------------------------------------------------------------------
@@ -61,6 +62,30 @@ class PatientInfo(BaseModel):
             except json.JSONDecodeError:
                 raise ValueError("symptoms must be a valid JSON list, e.g. '[\"redness\"]'")
         return v
+
+class WoundAnalysisRequest(BaseModel):
+    age: str
+    sex: str
+    symptoms: list[str]
+    duration: str
+    medical_history: str
+
+    @classmethod
+    def from_form(
+        cls,
+        age: str = Form(...),
+        sex: str = Form(...),
+        symptoms: str = Form(...),
+        duration: str = Form(...),
+        medical_history: str = Form(...),
+    ):
+        return cls(
+            age=age,
+            sex=sex,
+            symptoms=json.loads(symptoms),
+            duration=duration,
+            medical_history=medical_history,
+        )
 
 
 # ---------------------------------------------------------------------------

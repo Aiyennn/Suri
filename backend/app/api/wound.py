@@ -91,57 +91,12 @@ def list_assessments(
     offset: int = 0,
     db: Session = Depends(get_db),
 ) -> AssessmentListResponse:
-    """
-    Retrieve a paginated list of wound-assessment sessions.
 
-    Args:
-        limit:  Maximum number of assessments to return (default 50).
-        offset: Number of assessments to skip for pagination (default 0).
-        db:     SQLAlchemy session (injected).
+    service = WoundService(db)
 
-    Returns:
-        AssessmentListResponse containing total count and list of summaries.
-    """
-    from app.models.wound_assessment import WoundAssessment
-    from sqlalchemy import func
-
-    # Total count
-    total = db.query(func.count(WoundAssessment.id)).scalar() or 0
-
-    # Fetch assessments ordered by creation time descending
-    rows = (
-        db.query(WoundAssessment)
-        .order_by(WoundAssessment.created_at.desc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
-
-    summaries: list[AssessmentSummary] = []
-    for row in rows:
-        # Image count
-        image_count = len(row.images)
-
-        # Grab the first image's analysis result (if any)
-        first_result = None
-        if row.images:
-            first_image = row.images[0]
-            first_result = first_image.analysis_result
-
-        summaries.append(
-            AssessmentSummary(
-                id=str(row.id),
-                created_at=row.created_at.isoformat(),
-                patient_age=row.patient_age,
-                patient_sex=row.patient_sex,
-                symptoms=row.symptoms,
-                duration=row.duration,
-                risk_level=first_result.risk_level if first_result else None,
-                risk_score=first_result.risk_score if first_result else None,
-                wound_type=first_result.wound_type if first_result else None,
-                emergency=first_result.emergency if first_result else None,
-                image_count=image_count,
-            )
-        )
-
-    return AssessmentListResponse(total=total, assessments=summaries)
+    try:
+        result = service.get_assessments(limit, offset)
+        return result
+    except:
+        print("get list_assessments failed")
+        raise
