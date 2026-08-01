@@ -37,6 +37,7 @@ from sqlalchemy import func
 
 from app.schemas.wound import PatientInfo, WoundAnalysisRequest, WoundAnalysisResponse, WoundAnalysisResult, AssessmentListResponse, AssessmentSummary
 from app.models.wound_assessment import WoundAssessment
+from app.exceptions import InvalidPatientDataError, ImageQualityError, InvalidImageError, InternalServerError
 from pydantic import ValidationError
 from fastapi import UploadFile
 
@@ -70,8 +71,7 @@ class WoundService:
                 medical_history=requests.medical_history,
             )
         except ValidationError as exc:
-            print("InvalidPatientDataError") # Change into custom Error
-            raise
+            raise InvalidPatientDataError(exc.errors()) from exc
 
         # Create patient record
         try:
@@ -119,10 +119,8 @@ class WoundService:
                 results=image_results,
             )
         
-        except ValueError as exc:
-            # Raised by the image-quality gate or engine input validation
-            print("Error") # Change into custom Error
-            raise
+        except ImageQualityError as exc:
+            raise InvalidImageError(exc.reason)
         
         except Exception:
             logger.exception(
@@ -132,8 +130,7 @@ class WoundService:
                 requests.age,
                 requests.sex,
             )
-            print("Internal Server Error") # Change into custom Error
-            raise
+            raise InternalServerError from exc
 
 
     def process_wound_image(
@@ -208,7 +205,7 @@ class WoundService:
         self.db.add(quality_record)
 
         if not quality["is_valid"]:
-            raise ValueError("Image quality too low")
+            raise ImageQualityError("Image quality too low")
 
         # Step 3: Run AI inference on the validated image.
         model_output = analyze_wound(img)
