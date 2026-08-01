@@ -26,19 +26,17 @@ Response shape (see schemas/wound.py for the full Pydantic models):
 """
 
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form
-from sqlalchemy.orm import Session
 import logging
 
-from app.dependencies import get_db
-from app.models.wound_assessment import WoundAssessment
-from app.schemas.wound import (
-    WoundAnalysisResponse,
-    AssessmentSummary,
-    AssessmentListResponse,
-    WoundAnalysisRequest
-)
+from fastapi import APIRouter, Depends, File, UploadFile
+from sqlalchemy.orm import Session
 
+from app.dependencies import get_db
+from app.schemas.wound import (
+    AssessmentListResponse,
+    WoundAnalysisRequest,
+    WoundAnalysisResponse,
+)
 from app.services.wound_service import WoundService
 
 logger = logging.getLogger(__name__)

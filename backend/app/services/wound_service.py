@@ -19,30 +19,37 @@ After the pipeline completes, the results (image metadata, quality metrics,
 and analysis output) are persisted to the database.
 """
 
-import uuid
 import logging
+import uuid
 
+from fastapi import UploadFile
+from pydantic import ValidationError
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.services.image_quality import assess_image_quality
-from app.services.image_processing import process_image
 from app.ai.model import analyze_wound
 from app.engine import WoundAssessmentEngine
-
-from app.models.wound_image import WoundImage
-from app.models.image_quality_result import ImageQualityResult
+from app.exceptions import (
+    ImageQualityError,
+    InternalServerError,
+    InvalidImageError,
+    InvalidPatientDataError,
+)
 from app.models.analysis_result import WoundAnalysisDBResult
+from app.models.image_quality_result import ImageQualityResult
 from app.models.wound_assessment import WoundAssessment
-from sqlalchemy import func
-
-from app.schemas.wound import PatientInfo, WoundAnalysisRequest, WoundAnalysisResponse, WoundAnalysisResult, AssessmentListResponse, AssessmentSummary
-from app.models.wound_assessment import WoundAssessment
-from app.exceptions import InvalidPatientDataError, ImageQualityError, InvalidImageError, InternalServerError
-from pydantic import ValidationError
-from fastapi import UploadFile
-
+from app.models.wound_image import WoundImage
+from app.schemas.wound import (
+    AssessmentListResponse,
+    AssessmentSummary,
+    PatientInfo,
+    WoundAnalysisRequest,
+    WoundAnalysisResponse,
+    WoundAnalysisResult,
+)
+from app.services.image_processing import process_image
+from app.services.image_quality import assess_image_quality
 from app.utils.save_to_disk import _save_image_to_disk
-
 from typing import List
 
 logger = logging.getLogger(__name__)
