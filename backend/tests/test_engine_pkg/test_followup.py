@@ -4,19 +4,17 @@ tests/engine/test_followup.py
 Unit tests for ``engine/followup.py``.
 """
 
-import pytest
-from typing import Optional
+
 
 from app.engine.evaluator import EvaluationResult
 from app.engine.followup import FollowUpScheduler, _hours_to_label
 from app.engine.models import RiskLevel
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _make_result(minimum_follow_up_hours: Optional[int] = None) -> EvaluationResult:
+def _make_result(minimum_follow_up_hours: int | None = None) -> EvaluationResult:
     return EvaluationResult(
         matches=[],
         total_score=0,

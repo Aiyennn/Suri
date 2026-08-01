@@ -12,20 +12,14 @@ from pydantic import ValidationError
 
 from app.engine.models import (
     AssessmentResult,
-    BleedingLevel,
-    Classification,
     ExudateAmount,
     ExudateInfo,
     ExudateType,
-    HealingStage,
-    Observations,
     RiskLevel,
-    Severity,
     TriggeredRule,
     WoundAssessmentInput,
     WoundType,
 )
-
 
 # ---------------------------------------------------------------------------
 # ExudateInfo

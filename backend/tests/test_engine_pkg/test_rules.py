@@ -7,7 +7,6 @@ Each test builds a minimal ``WoundAssessmentInput`` that satisfies exactly
 one rule condition and asserts the condition evaluates as expected.
 """
 
-import pytest
 
 from app.engine.models import (
     BleedingLevel,
@@ -22,7 +21,6 @@ from app.engine.models import (
     WoundType,
 )
 from app.engine.registry import rule_registry
-
 
 # ---------------------------------------------------------------------------
 # Helpers

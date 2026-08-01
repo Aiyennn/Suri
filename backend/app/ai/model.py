@@ -7,8 +7,8 @@ This module abstracts the wound-analysis model behind a single callable,
 ``analyze_wound``.
 """
 
-import random
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 

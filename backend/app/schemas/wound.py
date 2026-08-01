@@ -14,10 +14,10 @@ automatic OpenAPI documentation via FastAPI.
 from __future__ import annotations
 
 import json
-from typing import List, Literal
-from pydantic import BaseModel, Field, field_validator
-from fastapi import Form
+from typing import Literal
 
+from fastapi import Form
+from pydantic import BaseModel, Field, field_validator
 
 # ---------------------------------------------------------------------------
 # Request schemas
@@ -36,7 +36,7 @@ class PatientInfo(BaseModel):
         description="Patient biological sex: 'male', 'female', or 'other'.",
         examples=["female"],
     )
-    symptoms: List[str] = Field(
+    symptoms: list[str] = Field(
         ...,
         description="Free-text list of observed symptoms reported by the patient.",
         examples=[["redness", "swelling", "discharge"]],
@@ -193,7 +193,7 @@ class WoundAnalysisResult(BaseModel):
         description="Categorical risk tier: 'Low', 'Moderate', 'High', or 'Critical'.",
         examples=["Moderate"],
     )
-    recommendations: List[str] = Field(
+    recommendations: list[str] = Field(
         description="Ordered, deduplicated action items for the clinician."
     )
     referral_required: bool = Field(
@@ -206,7 +206,7 @@ class WoundAnalysisResult(BaseModel):
         description="Recommended follow-up timeframe.",
         examples=["Review in 48 hours"],
     )
-    triggered_rules: List[TriggeredRule] = Field(
+    triggered_rules: list[TriggeredRule] = Field(
         description="All rules that matched and contributed to this assessment."
     )
     disclaimer: str = Field(
@@ -252,7 +252,7 @@ class WoundAnalysisResponse(BaseModel):
         ...,
         description="Patient demographics and clinical context as submitted.",
     )
-    results: List[WoundAnalysisResult] = Field(
+    results: list[WoundAnalysisResult] = Field(
         ...,
         description=(
             "List of rule-engine assessment results, one per uploaded image, "
@@ -273,7 +273,7 @@ class AssessmentSummary(BaseModel):
     created_at: str = Field(description="ISO-8601 timestamp when the assessment was created.")
     patient_age: str = Field(description="Patient age as stored.")
     patient_sex: str = Field(description="Patient biological sex.")
-    symptoms: List[str] = Field(description="List of reported symptoms.")
+    symptoms: list[str] = Field(description="List of reported symptoms.")
     duration: str = Field(description="Wound duration string.")
 
     # Summary of the first image's analysis result (if any)
@@ -288,4 +288,4 @@ class AssessmentListResponse(BaseModel):
     """Paginated list of past assessment summaries."""
 
     total: int = Field(description="Total number of assessments on record.")
-    assessments: List[AssessmentSummary] = Field(description="Ordered list of assessment summaries (newest first).")
+    assessments: list[AssessmentSummary] = Field(description="Ordered list of assessment summaries (newest first).")

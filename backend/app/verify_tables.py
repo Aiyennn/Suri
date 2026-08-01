@@ -2,12 +2,12 @@
 Quick verification: create all tables via the direct Supabase connection,
 then list what was created.
 """
-from sqlalchemy import create_engine, inspect, text
-from app.core.config import settings
-from app.db.database import Base
-
 # Import all models so they register with Base.metadata
 import models  # noqa: F401
+from sqlalchemy import create_engine, inspect
+
+from app.core.config import settings
+from app.db.database import Base
 
 # Use the direct connection (port 5432) for DDL if available, else pooler
 db_url = settings.DIRECT_DATABASE_URL if settings.DIRECT_DATABASE_URL else settings.DATABASE_URL

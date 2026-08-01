@@ -8,9 +8,11 @@ into an OpenCV-compatible NumPy array that downstream services and the AI
 model can consume.
 """
 
-import numpy as np
-import cv2
 import logging
+
+import cv2
+import numpy as np
+
 from app.exceptions import InvalidImageError
 
 logger = logging.getLogger(__name__)

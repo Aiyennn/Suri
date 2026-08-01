@@ -19,7 +19,6 @@ Design decisions
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 from uuid import UUID
 
 import bcrypt
@@ -61,7 +60,7 @@ _DUMMY_HASH: bytes = bcrypt.hashpw(b"__timing_dummy__", bcrypt.gensalt(rounds=12
 
 def create_access_token(
     subject: str,
-    expires_delta: Optional[timedelta] = None,
+    expires_delta: timedelta | None = None,
 ) -> str:
     """
     Create and sign a JWT access token.
@@ -126,7 +125,7 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
     Raises:
         HTTPException(401): If the email is not found or the password is wrong.
     """
-    user: Optional[User] = db.query(User).filter(User.email == email).first()
+    user: User | None = db.query(User).filter(User.email == email).first()
 
     # Constant-time dummy check — prevents email enumeration via response-time
     # differences. _DUMMY_HASH is a real bcrypt hash computed at startup.
@@ -191,13 +190,13 @@ def get_current_user(
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
-        user_id: Optional[str] = payload.get("sub")
+        user_id: str | None = payload.get("sub")
         if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    user: Optional[User] = db.query(User).filter(
+    user: User | None = db.query(User).filter(
         User.id == UUID(user_id)
     ).first()
 

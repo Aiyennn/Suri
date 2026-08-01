@@ -7,10 +7,9 @@ Verifies that score-to-level mapping respects all threshold boundaries,
 including edge cases at exact boundary values.
 """
 
-import pytest
 
 from app.engine.models import RiskLevel
-from app.engine.scoring import RiskScorer, SCORE_THRESHOLDS
+from app.engine.scoring import SCORE_THRESHOLDS, RiskScorer
 
 
 class TestRiskScorer:

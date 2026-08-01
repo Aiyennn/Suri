@@ -22,7 +22,6 @@ from app.engine.engine import WoundAssessmentEngine
 from app.engine.models import RiskLevel
 from app.engine.validation import InputValidationError
 
-
 # ---------------------------------------------------------------------------
 # Fixture: engine instance
 # ---------------------------------------------------------------------------

@@ -1,6 +1,7 @@
+import sys
+
 import cv2
 import numpy as np
-import sys
 
 for p in sys.path:
     print(p)
@@ -10,6 +11,7 @@ from app.utils.image_processing import (
     brightness_score,
     contrast_score,
 )
+
 
 def test_blur_score():
     img = np.zeros((500, 500, 3), dtype=np.uint8)

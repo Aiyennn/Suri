@@ -12,10 +12,8 @@ and its callers explicit.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
-
 
 # ---------------------------------------------------------------------------
 # Enumerations
@@ -97,7 +95,7 @@ class ExudateInfo(BaseModel):
     amount: ExudateAmount = Field(default=ExudateAmount.NONE, description="Approximate exudate volume.")
 
     @model_validator(mode="after")
-    def validate_consistency(self) -> "ExudateInfo":
+    def validate_consistency(self) -> ExudateInfo:
         """Ensure type/amount are NONE when exudate is absent."""
         if not self.present:
             if self.type != ExudateType.NONE:
@@ -138,7 +136,7 @@ class WoundAssessmentInput(BaseModel):
     confidence: float = Field(
         ge=0.0, le=1.0, description="Model confidence in [0, 1]."
     )
-    duration: Optional[WoundDuration] = Field(
+    duration: WoundDuration | None = Field(
         default=None,
         description="How long the wound has been present (patient-reported).",
     )

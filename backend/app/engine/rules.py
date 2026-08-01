@@ -25,8 +25,8 @@ Design notes
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Optional
+from collections.abc import Callable
+from dataclasses import dataclass
 
 from .models import (
     BleedingLevel,
@@ -38,7 +38,6 @@ from .models import (
     WoundDuration,
     WoundType,
 )
-
 
 # ---------------------------------------------------------------------------
 # Rule dataclass
@@ -91,7 +90,7 @@ class Rule:
     explanation: str
     forces_referral: bool = False
     forces_emergency: bool = False
-    follow_up_hours: Optional[int] = None
+    follow_up_hours: int | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -633,7 +632,7 @@ RULES: list[Rule] = [
             "⚠ The AI model's confidence in this classification is below 70%. "
             "Results may be less reliable. Clinical examination is especially important."
         ),
-        explanation=f"Model confidence is below the 70% reliability threshold.",
+        explanation="Model confidence is below the 70% reliability threshold.",
         forces_referral=False,
         forces_emergency=False,
         follow_up_hours=None,

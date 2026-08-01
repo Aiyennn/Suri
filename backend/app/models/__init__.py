@@ -11,16 +11,16 @@ and ``Base.metadata.create_all()`` calls.
 """
 
 from app.db.database import Base
+from app.models.analysis_result import WoundAnalysisDBResult
+from app.models.image_quality_result import ImageQualityResult
 from app.models.user import User
 from app.models.wound_assessment import WoundAssessment
 from app.models.wound_image import WoundImage
-from app.models.image_quality_result import ImageQualityResult
-from app.models.analysis_result import WoundAnalysisDBResult
 
 __all__ = [
+    "ImageQualityResult",
     "User",
+    "WoundAnalysisDBResult",
     "WoundAssessment",
     "WoundImage",
-    "ImageQualityResult",
-    "WoundAnalysisDBResult",
 ]

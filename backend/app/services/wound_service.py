@@ -50,7 +50,6 @@ from app.schemas.wound import (
 from app.services.image_processing import process_image
 from app.services.image_quality import assess_image_quality
 from app.utils.save_to_disk import _save_image_to_disk
-from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +64,7 @@ class WoundService:
     async def analyze_wound(
             self,
             requests: WoundAnalysisRequest,
-            images: List[UploadFile],
+            images: list[UploadFile],
             ) -> WoundAnalysisResponse:
 
         # Validate patient info
@@ -96,7 +95,7 @@ class WoundService:
             logger.info("Created assessment %s", assessment_id)
     
             # ── Steps 3-8: Process each image through the pipeline ────────────
-            image_results: List[WoundAnalysisResult] = []
+            image_results: list[WoundAnalysisResult] = []
             for image in images:
                 image_bytes = await image.read()
     

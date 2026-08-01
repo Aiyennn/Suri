@@ -11,11 +11,9 @@ These schemas define:
 from __future__ import annotations
 
 from datetime import date
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
-
 
 # ---------------------------------------------------------------------------
 # Request schemas
@@ -42,17 +40,17 @@ class UserRegisterRequest(BaseModel):
         description="User's display name.",
         examples=["Jane Doe"],
     )
-    date_of_birth: Optional[date] = Field(
+    date_of_birth: date | None = Field(
         None,
         description="Optional date of birth (ISO 8601 date string).",
         examples=["1990-06-15"],
     )
-    sex: Optional[str] = Field(
+    sex: str | None = Field(
         None,
         description="Biological sex: 'male', 'female', or 'other'.",
         examples=["female"],
     )
-    medical_history: Optional[str] = Field(
+    medical_history: str | None = Field(
         None,
         description="Freeform medical background (conditions, allergies, medications).",
         examples=["Type 2 diabetes, penicillin allergy"],
@@ -97,9 +95,9 @@ class UserResponse(BaseModel):
     id: UUID = Field(..., description="User UUID.")
     email: str = Field(..., description="User email address.")
     full_name: str = Field(..., description="User display name.")
-    date_of_birth: Optional[date] = Field(None, description="Date of birth.")
-    sex: Optional[str] = Field(None, description="Biological sex.")
-    medical_history: Optional[str] = Field(None, description="Medical background.")
+    date_of_birth: date | None = Field(None, description="Date of birth.")
+    sex: str | None = Field(None, description="Biological sex.")
+    medical_history: str | None = Field(None, description="Medical background.")
     is_active: bool = Field(..., description="Whether the account is active.")
 
     model_config = {"from_attributes": True}

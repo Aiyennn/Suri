@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from .evaluator import EvaluationResult
 
-
 # ---------------------------------------------------------------------------
 # Universal safety footer
 # ---------------------------------------------------------------------------

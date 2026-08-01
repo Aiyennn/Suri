@@ -7,6 +7,7 @@ All configuration is centralised here so that every module imports a single
 ``settings`` instance rather than reading ``os.environ`` directly.
 """
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent

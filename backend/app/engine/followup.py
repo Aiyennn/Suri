@@ -22,7 +22,6 @@ from __future__ import annotations
 from .evaluator import EvaluationResult
 from .models import RiskLevel
 
-
 # ---------------------------------------------------------------------------
 # Risk-level defaults (hours; 0 means "Immediate")
 # ---------------------------------------------------------------------------

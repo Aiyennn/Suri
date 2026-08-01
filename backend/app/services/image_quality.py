@@ -16,12 +16,13 @@ quality checks:
                        Low contrast flattens wound-vs-healthy-tissue differences.
 """
 
+import logging
+
 from app.utils.image_processing import (
     blur_score,
     brightness_score,
     contrast_score,
 )
-import logging
 
 logger = logging.getLogger(__name__)
 

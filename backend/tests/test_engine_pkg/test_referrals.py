@@ -4,14 +4,11 @@ tests/engine/test_referrals.py
 Unit tests for ``engine/referrals.py``.
 """
 
-import pytest
-from dataclasses import dataclass, field
-from typing import Optional
 
-from app.engine.evaluator import EvaluationResult, RuleMatch
+
+from app.engine.evaluator import EvaluationResult
 from app.engine.models import RiskLevel
 from app.engine.referrals import ReferralEngine
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -21,7 +18,7 @@ def _make_result(
     forces_referral: bool = False,
     forces_emergency: bool = False,
     total_score: int = 0,
-    minimum_follow_up_hours: Optional[int] = None,
+    minimum_follow_up_hours: int | None = None,
 ) -> EvaluationResult:
     return EvaluationResult(
         matches=[],

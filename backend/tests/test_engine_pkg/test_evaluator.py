@@ -7,9 +7,8 @@ Uses isolated registries with hand-crafted rules to test the evaluator's
 aggregation logic without depending on the full built-in rule set.
 """
 
-import pytest
 
-from app.engine.evaluator import EvaluationResult, RuleEvaluator
+from app.engine.evaluator import RuleEvaluator
 from app.engine.models import (
     BleedingLevel,
     Classification,
@@ -24,7 +23,6 @@ from app.engine.models import (
 )
 from app.engine.registry import RuleRegistry
 from app.engine.rules import Rule
-
 
 # ---------------------------------------------------------------------------
 # Helpers

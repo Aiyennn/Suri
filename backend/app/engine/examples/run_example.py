@@ -15,8 +15,8 @@ or from the app/ directory:
 from __future__ import annotations
 
 import json
-import sys
 import os
+import sys
 
 # Allow running from either backend/ or backend/app/
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))

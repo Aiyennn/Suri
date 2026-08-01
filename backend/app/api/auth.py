@@ -13,7 +13,7 @@ All routes in this module are mounted under the ``/auth`` prefix by
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
