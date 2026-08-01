@@ -1,25 +1,74 @@
-# Virtual environment
+```gitignore
+# =========================
+# Virtual environments
+# =========================
 .venv/
 venv/
+env/
 
-# Python cache
+# =========================
+# Python
+# =========================
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
 # Environment variables
+# =========================
 .env
+.env.*
+!.env.example
 
-# OS files
-.DS_Store
-
-# pytest
+# =========================
+# Testing & coverage
+# =========================
 .pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
 
-# IDEs
+# =========================
+# IDEs & editors
+# =========================
 .vscode/
 .idea/
 
-# logs
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
 *.log
+
+# =========================
+# Local databases
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Uploaded/generated files
+# =========================
+uploads/
+tmp/
+temp/
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+```

@@ -25,7 +25,6 @@ import uuid
 from fastapi import UploadFile
 from pydantic import ValidationError
 from sqlalchemy import func
-from sqlalchemy.orm import Session
 
 from app.ai.model import analyze_wound
 from app.engine import WoundAssessmentEngine
@@ -50,6 +49,7 @@ from app.schemas.wound import (
 from app.services.image_processing import process_image
 from app.services.image_quality import assess_image_quality
 from app.utils.save_to_disk import _save_image_to_disk
+from app.repository.wound_repository import AssessmentRepository
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +58,8 @@ _engine = WoundAssessmentEngine()
 
 class WoundService:
 
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self, repository: AssessmentRepository):
+        self.repository = repository
 
     async def analyze_wound(
             self,
@@ -81,15 +81,13 @@ class WoundService:
 
         # Create patient record
         try:
-            assessment_row = WoundAssessment(
-                patient_age=requests.age,
-                patient_sex=requests.sex,
-                symptoms=requests.symptoms,  # already parsed list
+            assessment_row = self.repository.save_patient_record(
+                age=requests.age,
+                sex=requests.sex,
+                symptoms=requests.symptoms,
                 duration=requests.duration,
                 medical_history=requests.medical_history,
             )
-            self.db.add(assessment_row)
-            self.db.flush()  # obtain assessment_row.id for FK references
     
             assessment_id = assessment_row.id
             logger.info("Created assessment %s", assessment_id)
@@ -128,7 +126,7 @@ class WoundService:
         except ImageQualityError as exc:
             raise InvalidImageError(exc.reason)
         
-        except Exception:
+        except Exception as exc:
             logger.exception(
                 "Unexpected error during wound analysis "
                 "(images=%d age=%s sex=%s)",
@@ -136,7 +134,7 @@ class WoundService:
                 requests.age,
                 requests.sex,
             )
-            raise InternalServerError from exc
+            raise InternalServerError() from exc
 
 
     def process_wound_image(
@@ -191,24 +189,21 @@ class WoundService:
         quality = assess_image_quality(img)
 
         # ── Persist the image record ──────────────────────────────────────────
-        wound_image = WoundImage(
+        wound_image = self.repository.save_image_record(
             assessment_id=assessment_id,
             image_path=image_path,
             original_filename=original_filename,
             content_type=content_type,
         )
-        self.db.add(wound_image)
-        self.db.flush()  # obtain wound_image.id for FK references
 
         # ── Persist quality metrics ───────────────────────────────────────────
-        quality_record = ImageQualityResult(
+        quality_record = self.repository.save_quality_metrics(
             image_id=wound_image.id,
             is_valid=quality["is_valid"],
             blur=quality["metrics"]["blur"],
             brightness=quality["metrics"]["brightness"],
             contrast=quality["metrics"]["contrast"],
         )
-        self.db.add(quality_record)
 
         if not quality["is_valid"]:
             raise ImageQualityError("Image quality too low")
@@ -235,7 +230,7 @@ class WoundService:
 
         # ── Persist analysis result ───────────────────────────────────────────
         assessment_dict = assessment.model_dump()
-        analysis_record = WoundAnalysisDBResult(
+        analysis_record = self.repository.save_analysis_result(
             image_id=wound_image.id,
             wound_type=wound_type,
             severity=severity,
@@ -250,7 +245,6 @@ class WoundService:
             triggered_rules=assessment_dict["triggered_rules"],
             disclaimer=assessment_dict["disclaimer"],
         )
-        self.db.add(analysis_record)
 
         # ── Build combined response ───────────────────────────────────────────
         result = {
@@ -264,47 +258,39 @@ class WoundService:
         return result
 
     def get_assessments(
-            self,
-            limit: int,
-            offset: int,
+                self,
+                limit: int,
+                offset: int,
         ) -> AssessmentListResponse:
 
-        total = self.db.query(func.count(WoundAssessment.id)).scalar() or 0
+            rows, total = self.repository.get_assessments_with_count(limit, offset)
 
-        rows = (
-            self.db.query(WoundAssessment)
-            .order_by(WoundAssessment.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-            .all()
-        )
+            summaries: list[AssessmentSummary] = []
+            for row in rows:
+                # Image count
+                image_count = len(row.images)
 
-        summaries: list[AssessmentSummary] = []
-        for row in rows:
-            # Image count
-            image_count = len(row.images)
-    
-            # Grab the first image's analysis result (if any)
-            first_result = None
-            if row.images:
-                first_image = row.images[0]
-                first_result = first_image.analysis_result
-    
-            summaries.append(
-                AssessmentSummary(
-                    id=str(row.id),
-                    created_at=row.created_at.isoformat(),
-                    patient_age=row.patient_age,
-                    patient_sex=row.patient_sex,
-                    symptoms=row.symptoms,
-                    duration=row.duration,
-                    risk_level=first_result.risk_level if first_result else None,
-                    risk_score=first_result.risk_score if first_result else None,
-                    wound_type=first_result.wound_type if first_result else None,
-                    emergency=first_result.emergency if first_result else None,
-                    image_count=image_count,
+                # Grab the first image's analysis result (if any)
+                first_result = None
+                if row.images:
+                    first_image = row.images[0]
+                    first_result = first_image.analysis_result
+
+                summaries.append(
+                    AssessmentSummary(
+                        id=str(row.id),
+                        created_at=row.created_at.isoformat(),
+                        patient_age=row.patient_age,
+                        patient_sex=row.patient_sex,
+                        symptoms=row.symptoms,
+                        duration=row.duration,
+                        risk_level=first_result.risk_level if first_result else None,
+                        risk_score=first_result.risk_score if first_result else None,
+                        wound_type=first_result.wound_type if first_result else None,
+                        emergency=first_result.emergency if first_result else None,
+                        image_count=image_count,
+                    )
                 )
-            )
-        
-        return AssessmentListResponse(total=total, assessments=summaries)
+
+            return AssessmentListResponse(total=total, assessments=summaries)
         
