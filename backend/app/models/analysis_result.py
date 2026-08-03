@@ -30,7 +30,7 @@ from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 
-class WoundAnalysisDBResult(Base):
+class WoundAnalysisRecord(Base):
     """Complete rule-engine assessment output for a single wound image."""
 
     __tablename__ = "wound_analysis_results"
@@ -132,6 +132,6 @@ class WoundAnalysisDBResult(Base):
 
     def __repr__(self) -> str:
         return (
-            f"<WoundAnalysisDBResult id={self.id!s:.8} "
+            f"<WoundAnalysisRecord id={self.id!s:.8} "
             f"risk_level={self.risk_level!r} emergency={self.emergency}>"
         )

@@ -4,7 +4,7 @@ ai/model.py
 AI model interface for wound-risk prediction.
 
 This module abstracts the wound-analysis model behind a single callable,
-``analyze_wound``.
+``classify_wound``.
 """
 
 import logging
@@ -13,7 +13,7 @@ import random
 logger = logging.getLogger(__name__)
 
 
-def analyze_wound(image) -> dict:
+def classify_wound(image) -> dict:
     """
     Run wound classification inference on a decoded image.
 
@@ -40,7 +40,7 @@ def analyze_wound(image) -> dict:
     TODO:
         Replace mock values with actual model inference.
     """
-    logging.info("Model analyzing wound")
+    logger.info("Model classifying wound")
 
     wound_type = random.choice([
         "abrasion",

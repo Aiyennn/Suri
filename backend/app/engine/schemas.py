@@ -1,6 +1,6 @@
 """
-engine/models.py
-================
+engine/schemas.py
+=================
 Pydantic v2 data models for the wound-assessment rule engine.
 
 All categorical input fields are validated against strict ``Enum`` types so

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pydantic import ValidationError
 
-from .models import WoundAssessmentInput
+from app.engine.schemas import WoundAssessmentInput
 
 
 class InputValidationError(ValueError):

@@ -7,8 +7,8 @@ Unit tests for ``engine/referrals.py``.
 
 
 from app.engine.evaluator import EvaluationResult
-from app.engine.models import RiskLevel
-from app.engine.referrals import ReferralEngine
+from app.engine.schemas import RiskLevel
+from app.engine.referrals import ReferralChecker
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -33,9 +33,9 @@ def _make_result(
 # Tests
 # ---------------------------------------------------------------------------
 
-class TestReferralEngine:
+class TestReferralChecker:
     def setup_method(self):
-        self.engine = ReferralEngine()
+        self.engine = ReferralChecker()
 
     def test_forced_referral_returns_true_regardless_of_level(self):
         result = _make_result(forces_referral=True)

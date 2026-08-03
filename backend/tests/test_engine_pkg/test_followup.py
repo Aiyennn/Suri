@@ -8,7 +8,7 @@ Unit tests for ``engine/followup.py``.
 
 from app.engine.evaluator import EvaluationResult
 from app.engine.followup import FollowUpScheduler, _hours_to_label
-from app.engine.models import RiskLevel
+from app.engine.schemas import RiskLevel
 
 # ---------------------------------------------------------------------------
 # Helpers

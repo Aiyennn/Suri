@@ -8,7 +8,7 @@ including edge cases at exact boundary values.
 """
 
 
-from app.engine.models import RiskLevel
+from app.engine.schemas import RiskLevel
 from app.engine.scoring import SCORE_THRESHOLDS, RiskScorer
 
 
@@ -21,40 +21,40 @@ class TestRiskScorer:
     # ------------------------------------------------------------------
 
     def test_score_0_is_low(self):
-        assert self.scorer.score_to_level(0) == RiskLevel.LOW
+        assert self.scorer.classify_risk_level(0) == RiskLevel.LOW
 
     def test_score_3_is_low(self):
-        assert self.scorer.score_to_level(3) == RiskLevel.LOW
+        assert self.scorer.classify_risk_level(3) == RiskLevel.LOW
 
     # ------------------------------------------------------------------
     # Moderate risk band  (4–7)
     # ------------------------------------------------------------------
 
     def test_score_4_is_moderate(self):
-        assert self.scorer.score_to_level(4) == RiskLevel.MODERATE
+        assert self.scorer.classify_risk_level(4) == RiskLevel.MODERATE
 
     def test_score_7_is_moderate(self):
-        assert self.scorer.score_to_level(7) == RiskLevel.MODERATE
+        assert self.scorer.classify_risk_level(7) == RiskLevel.MODERATE
 
     # ------------------------------------------------------------------
     # High risk band  (8–12)
     # ------------------------------------------------------------------
 
     def test_score_8_is_high(self):
-        assert self.scorer.score_to_level(8) == RiskLevel.HIGH
+        assert self.scorer.classify_risk_level(8) == RiskLevel.HIGH
 
     def test_score_12_is_high(self):
-        assert self.scorer.score_to_level(12) == RiskLevel.HIGH
+        assert self.scorer.classify_risk_level(12) == RiskLevel.HIGH
 
     # ------------------------------------------------------------------
     # Critical risk band  (13+)
     # ------------------------------------------------------------------
 
     def test_score_13_is_critical(self):
-        assert self.scorer.score_to_level(13) == RiskLevel.CRITICAL
+        assert self.scorer.classify_risk_level(13) == RiskLevel.CRITICAL
 
     def test_score_100_is_critical(self):
-        assert self.scorer.score_to_level(100) == RiskLevel.CRITICAL
+        assert self.scorer.classify_risk_level(100) == RiskLevel.CRITICAL
 
     # ------------------------------------------------------------------
     # Custom thresholds
@@ -68,10 +68,10 @@ class TestRiskScorer:
                 (0,  RiskLevel.LOW),
             ]
         )
-        assert custom_scorer.score_to_level(4) == RiskLevel.LOW
-        assert custom_scorer.score_to_level(5) == RiskLevel.HIGH
-        assert custom_scorer.score_to_level(9) == RiskLevel.HIGH
-        assert custom_scorer.score_to_level(10) == RiskLevel.CRITICAL
+        assert custom_scorer.classify_risk_level(4) == RiskLevel.LOW
+        assert custom_scorer.classify_risk_level(5) == RiskLevel.HIGH
+        assert custom_scorer.classify_risk_level(9) == RiskLevel.HIGH
+        assert custom_scorer.classify_risk_level(10) == RiskLevel.CRITICAL
 
 
 class TestScoreThresholdsConstant:

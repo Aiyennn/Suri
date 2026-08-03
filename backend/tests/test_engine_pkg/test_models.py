@@ -10,7 +10,7 @@ consistency cross-validator.
 import pytest
 from pydantic import ValidationError
 
-from app.engine.models import (
+from app.engine.schemas import (
     AssessmentResult,
     ExudateAmount,
     ExudateInfo,

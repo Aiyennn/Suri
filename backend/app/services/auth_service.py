@@ -36,16 +36,16 @@ from app.schemas.auth import UserRegisterRequest
 # Password hashing — using bcrypt directly
 # ---------------------------------------------------------------------------
 
-def hash_password(plain: str) -> str:
-    """Return the bcrypt hash of *plain* as a UTF-8 string."""
-    hashed = bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt(rounds=12))
+def hash_password(plain_password: str) -> str:
+    """Return the bcrypt hash of *plain_password* as a UTF-8 string."""
+    hashed = bcrypt.hashpw(plain_password.encode("utf-8"), bcrypt.gensalt(rounds=12))
     return hashed.decode("utf-8")
 
 
-def verify_password(plain: str, hashed: str) -> bool:
-    """Return ``True`` if *plain* matches *hashed*."""
+def verify_password(plain_password: str, hashed: str) -> bool:
+    """Return ``True`` if *plain_password* matches *hashed*."""
     try:
-        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+        return bcrypt.checkpw(plain_password.encode("utf-8"), hashed.encode("utf-8"))
     except Exception:
         return False
 
@@ -93,8 +93,8 @@ def register_user(db: Session, req: UserRegisterRequest) -> User:
     Raises:
         HTTPException(400): If a user with the same email already exists.
     """
-    existing = db.query(User).filter(User.email == req.email).first()
-    if existing:
+    existing_user = db.query(User).filter(User.email == req.email).first()
+    if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="A user with this email address already exists.",

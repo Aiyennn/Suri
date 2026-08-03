@@ -70,7 +70,7 @@ class WoundImage(Base):
         cascade="all, delete-orphan",
     )
     analysis_result = relationship(
-        "WoundAnalysisDBResult",
+        "WoundAnalysisRecord",
         back_populates="image",
         uselist=False,
         cascade="all, delete-orphan",

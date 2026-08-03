@@ -30,7 +30,7 @@ import logging
 
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
-from app.repository.wound_repository import AssessmentRepository
+from app.repository.wound_repository import WoundAssessmentRepository
 
 from app.dependencies import get_db
 from app.schemas.wound import (
@@ -63,7 +63,7 @@ async def analyze_wound(
     db: Session = Depends(get_db)
 ):
 
-    repository = AssessmentRepository(db)
+    repository = WoundAssessmentRepository(db)
     service = WoundService(repository)
 
     try:
@@ -92,7 +92,7 @@ def list_assessments(
     db: Session = Depends(get_db),
 ) -> AssessmentListResponse:
 
-    repository = AssessmentRepository(db)
+    repository = WoundAssessmentRepository(db)
     service = WoundService(repository)
 
     try:

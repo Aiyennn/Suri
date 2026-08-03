@@ -1,18 +1,18 @@
 from app.models.wound_assessment import WoundAssessment
 from app.models.wound_image import WoundImage
 from app.models.image_quality_result import ImageQualityResult
-from app.models.analysis_result import WoundAnalysisDBResult
+from app.models.analysis_result import WoundAnalysisRecord
 from app.schemas.wound import AssessmentListResponse, AssessmentSummary
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 import uuid
 
-class AssessmentRepository:
+class WoundAssessmentRepository:
 
     def __init__(self, db: Session):
         self.db = db
 
-    def save_patient_record(
+    def create_assessment(
             self,
             age: int,
             sex: str,
@@ -86,8 +86,8 @@ class AssessmentRepository:
         follow_up: str,
         triggered_rules: list[str],
         disclaimer: str,
-    ) -> WoundAnalysisDBResult:
-        analysis_record = WoundAnalysisDBResult(
+    ) -> WoundAnalysisRecord:
+        analysis_record = WoundAnalysisRecord(
             image_id=image_id,
             wound_type=wound_type,
             severity=severity,

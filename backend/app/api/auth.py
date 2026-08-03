@@ -135,7 +135,7 @@ def login(
         "Requires a valid JWT Bearer token in the Authorization header."
     ),
 )
-def me(current_user: User = Depends(get_current_user)) -> UserResponse:
+def get_current_user_profile(current_user: User = Depends(get_current_user)) -> UserResponse:
     """
     Return the authenticated user's public profile.
 

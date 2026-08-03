@@ -8,7 +8,7 @@ one rule condition and asserts the condition evaluates as expected.
 """
 
 
-from app.engine.models import (
+from app.engine.schemas import (
     BleedingLevel,
     Classification,
     ExudateAmount,

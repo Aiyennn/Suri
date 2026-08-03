@@ -164,7 +164,7 @@ class WoundAnalysisResult(BaseModel):
     """
     Full deterministic output produced by the rule engine for a single image.
 
-    Mirrors ``engine.models.AssessmentResult`` so that the API response
+    Mirrors ``engine.schemas.AssessmentResult`` so that the API response
     accurately reflects what the engine computed.  Also includes the AI
     classification fields that were used as input to the rule engine.
     """

@@ -9,7 +9,7 @@ aggregation logic without depending on the full built-in rule set.
 
 
 from app.engine.evaluator import RuleEvaluator
-from app.engine.models import (
+from app.engine.schemas import (
     BleedingLevel,
     Classification,
     ExudateAmount,

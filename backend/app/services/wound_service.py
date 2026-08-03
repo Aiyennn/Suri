@@ -26,7 +26,7 @@ from fastapi import UploadFile
 from pydantic import ValidationError
 from sqlalchemy import func
 
-from app.ai.model import analyze_wound
+from app.ai.model import classify_wound
 from app.engine import WoundAssessmentEngine
 from app.exceptions import (
     ImageQualityError,
@@ -34,7 +34,7 @@ from app.exceptions import (
     InvalidImageError,
     InvalidPatientDataError,
 )
-from app.models.analysis_result import WoundAnalysisDBResult
+from app.models.analysis_result import WoundAnalysisRecord
 from app.models.image_quality_result import ImageQualityResult
 from app.models.wound_assessment import WoundAssessment
 from app.models.wound_image import WoundImage
@@ -46,50 +46,50 @@ from app.schemas.wound import (
     WoundAnalysisResponse,
     WoundAnalysisResult,
 )
-from app.services.image_processing import process_image
+from app.services.image_decoder import decode_image
 from app.services.image_quality import assess_image_quality
-from app.utils.save_to_disk import _save_image_to_disk
-from app.repository.wound_repository import AssessmentRepository
+from app.utils.file_storage import save_image_to_disk
+from app.repository.wound_repository import WoundAssessmentRepository
 
 logger = logging.getLogger(__name__)
 
 # Module-level engine instance — initialised once, reused across requests.
-_engine = WoundAssessmentEngine()
+_wound_engine = WoundAssessmentEngine()
 
 class WoundService:
 
-    def __init__(self, repository: AssessmentRepository):
+    def __init__(self, repository: WoundAssessmentRepository):
         self.repository = repository
 
     async def analyze_wound(
             self,
-            requests: WoundAnalysisRequest,
+            request: WoundAnalysisRequest,
             images: list[UploadFile],
             ) -> WoundAnalysisResponse:
 
         # Validate patient info
         try:
             patient = PatientInfo(
-                age=requests.age,
-                sex=requests.sex,
-                symptoms=requests.symptoms,
-                duration=requests.duration,
-                medical_history=requests.medical_history,
+                age=request.age,
+                sex=request.sex,
+                symptoms=request.symptoms,
+                duration=request.duration,
+                medical_history=request.medical_history,
             )
         except ValidationError as exc:
             raise InvalidPatientDataError(exc.errors()) from exc
 
         # Create patient record
         try:
-            assessment_row = self.repository.save_patient_record(
-                age=requests.age,
-                sex=requests.sex,
-                symptoms=requests.symptoms,
-                duration=requests.duration,
-                medical_history=requests.medical_history,
+            assessment = self.repository.create_assessment(
+                age=request.age,
+                sex=request.sex,
+                symptoms=request.symptoms,
+                duration=request.duration,
+                medical_history=request.medical_history,
             )
     
-            assessment_id = assessment_row.id
+            assessment_id = assessment.id
             logger.info("Created assessment %s", assessment_id)
     
             # ── Steps 3-8: Process each image through the pipeline ────────────
@@ -98,7 +98,7 @@ class WoundService:
                 image_bytes = await image.read()
     
                 # Save the image to disk
-                image_path = _save_image_to_disk(
+                image_path = save_image_to_disk(
                     image_bytes,
                     assessment_id,
                     image.filename or "wound_image.jpg",
@@ -131,8 +131,8 @@ class WoundService:
                 "Unexpected error during wound analysis "
                 "(images=%d age=%s sex=%s)",
                 len(images),
-                requests.age,
-                requests.sex,
+                request.age,
+                request.sex,
             )
             raise InternalServerError() from exc
 
@@ -183,7 +183,7 @@ class WoundService:
         logger.info("Starting analyzing wound image")
 
         # Step 1: Decode the raw bytes into a NumPy BGR image array.
-        img = process_image(image_bytes)
+        img = decode_image(image_bytes)
 
         # Step 2: Compute quality metrics and enforce minimum thresholds.
         quality = assess_image_quality(img)
@@ -209,12 +209,12 @@ class WoundService:
             raise ImageQualityError("Image quality too low")
 
         # Step 3: Run AI inference on the validated image.
-        model_output = analyze_wound(img)
+        model_output = classify_wound(img)
         logger.info("AI model inference complete.")
 
         # Step 4: Apply the deterministic rule engine to the model output.
         patient_context = {"duration": duration} if duration else None
-        assessment = _engine.assess(model_output, patient_context=patient_context)
+        assessment = _wound_engine.assess(model_output, patient_context=patient_context)
         logger.info(
             "Rule engine assessment complete — level=%s, emergency=%s.",
             assessment.risk_level,
@@ -263,27 +263,27 @@ class WoundService:
                 offset: int,
         ) -> AssessmentListResponse:
 
-            rows, total = self.repository.get_assessments_with_count(limit, offset)
+            assessments, total = self.repository.get_assessments_with_count(limit, offset)
 
             summaries: list[AssessmentSummary] = []
-            for row in rows:
+            for assessment in assessments:
                 # Image count
-                image_count = len(row.images)
+                image_count = len(assessment.images)
 
                 # Grab the first image's analysis result (if any)
                 first_result = None
-                if row.images:
-                    first_image = row.images[0]
+                if assessment.images:
+                    first_image = assessment.images[0]
                     first_result = first_image.analysis_result
 
                 summaries.append(
                     AssessmentSummary(
-                        id=str(row.id),
-                        created_at=row.created_at.isoformat(),
-                        patient_age=row.patient_age,
-                        patient_sex=row.patient_sex,
-                        symptoms=row.symptoms,
-                        duration=row.duration,
+                        id=str(assessment.id),
+                        created_at=assessment.created_at.isoformat(),
+                        patient_age=assessment.patient_age,
+                        patient_sex=assessment.patient_sex,
+                        symptoms=assessment.symptoms,
+                        duration=assessment.duration,
                         risk_level=first_result.risk_level if first_result else None,
                         risk_score=first_result.risk_score if first_result else None,
                         wound_type=first_result.wound_type if first_result else None,

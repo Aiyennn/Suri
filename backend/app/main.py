@@ -56,7 +56,7 @@ app.include_router(wound_router, prefix="/wound", tags=["wound"])
 # Health check
 # ---------------------------------------------------------------------------
 @app.get("/", tags=["health"])
-def health():
+def health_check():
     """
     Infrastructure health check.
 

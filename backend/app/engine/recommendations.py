@@ -10,7 +10,7 @@ wins), and appends a universal safety footer.
 
 from __future__ import annotations
 
-from .evaluator import EvaluationResult
+from app.engine.evaluator import EvaluationResult
 
 # ---------------------------------------------------------------------------
 # Universal safety footer
@@ -23,7 +23,7 @@ _SAFETY_FOOTER: str = (
 )
 
 
-class RecommendationEngine:
+class RecommendationBuilder:
     """
     Produces a deduplicated, ordered list of recommendation strings.
 

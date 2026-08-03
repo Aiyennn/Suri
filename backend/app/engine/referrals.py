@@ -15,11 +15,11 @@ independently of the evaluator and scoring components.
 
 from __future__ import annotations
 
-from .evaluator import EvaluationResult
-from .models import RiskLevel
+from app.engine.evaluator import EvaluationResult
+from app.engine.schemas import RiskLevel
 
 
-class ReferralEngine:
+class ReferralChecker:
     """
     Determines whether a referral to a healthcare provider is required.
 

@@ -1,6 +1,6 @@
 """
-services/image_processing.py
-============================
+services/image_decoder.py
+=========================
 Low-level image decoding service for the wound-analysis pipeline.
 
 Converts raw binary file content (as received from an HTTP multipart upload)
@@ -18,7 +18,7 @@ from app.exceptions import InvalidImageError
 logger = logging.getLogger(__name__)
 
 
-def process_image(image_bytes: bytes):
+def decode_image(image_bytes: bytes):
     """
     Decode raw image bytes into a BGR NumPy array.
 
@@ -51,14 +51,14 @@ def process_image(image_bytes: bytes):
                 "OpenCV failed to decode image (size=%d bytes)",
                 len(image_bytes),
             )
-            raise InvalidImageError 
-        
+            raise InvalidImageError
+
         logger.info(
             "Image decoded successfully (shape=%s dtype=%s)",
             image.shape,
             image.dtype
         )
-        
+
         return image
 
     except Exception:

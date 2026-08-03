@@ -7,7 +7,7 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
-def _save_image_to_disk(image_bytes: bytes, assessment_id: uuid.UUID, filename: str) -> str:
+def save_image_to_disk(image_bytes: bytes, assessment_id: uuid.UUID, filename: str) -> str:
     """
     Persist raw image bytes to the uploads directory.
 

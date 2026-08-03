@@ -21,7 +21,7 @@ or overridden in tests without instantiating a custom class.
 
 from __future__ import annotations
 
-from .models import RiskLevel
+from app.engine.schemas import RiskLevel
 
 # ---------------------------------------------------------------------------
 # Threshold constants (inclusive lower bounds, ascending order)
@@ -56,7 +56,7 @@ class RiskScorer:
     ) -> None:
         self._thresholds = thresholds if thresholds is not None else SCORE_THRESHOLDS
 
-    def score_to_level(self, score: int) -> RiskLevel:
+    def classify_risk_level(self, score: int) -> RiskLevel:
         """
         Map a cumulative integer score to a ``RiskLevel``.
 

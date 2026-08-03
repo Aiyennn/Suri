@@ -18,7 +18,7 @@ quality checks:
 
 import logging
 
-from app.utils.image_processing import (
+from app.utils.image_metrics import (
     blur_score,
     brightness_score,
     contrast_score,
@@ -69,13 +69,13 @@ def assess_image_quality(image) -> dict:
             - ``"metrics"``  (dict): Raw metric values (blur, brightness, contrast).
     """
     logger.debug(
-        "Starting image quality assestment"
+        "Starting image quality assessment"
     )
 
     metrics = compute_image_quality(image)
 
     logger.info(
-        "Image quality assestment complete"
+        "Image quality assessment complete"
     )
 
     # Individual quality checks — each maps to a specific failure mode.

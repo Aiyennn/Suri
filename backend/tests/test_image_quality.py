@@ -6,7 +6,7 @@ import numpy as np
 for p in sys.path:
     print(p)
 
-from app.utils.image_processing import (
+from app.utils.image_metrics import (
     blur_score,
     brightness_score,
     contrast_score,
