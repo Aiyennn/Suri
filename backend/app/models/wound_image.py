@@ -11,7 +11,7 @@ assessment session.  The actual image bytes are stored externally
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, ForeignKey, String
+from sqlalchemy import Column, DateTime, ForeignKey, String, LargeBinary
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -36,10 +36,10 @@ class WoundImage(Base):
         index=True,
         doc="FK to the parent assessment session.",
     )
-    image_path = Column(
-        String(500),
+    image_bytes = Column(
+        LargeBinary,
         nullable=False,
-        doc="File path or URL pointing to the stored image.",
+        doc="Raw bytes of the uploaded image."
     )
     original_filename = Column(
         String(255),

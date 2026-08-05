@@ -36,14 +36,14 @@ class WoundAssessmentRepository:
     def save_image_record(
             self,
             assessment_id: uuid.UUID,
-            image_path: str,
+            image_bytes: bytes,
             original_filename: str | None,
             content_type: str | None,
             
     ) -> WoundImage:
         wound_image = WoundImage(
             assessment_id=assessment_id,
-            image_path=image_path,
+            image_bytes=image_bytes,
             original_filename=original_filename,
             content_type=content_type
         )

@@ -37,10 +37,7 @@ from app.exceptions import (
     InternalServerError,
     InvalidImageError,
 )
-from app.models.analysis_result import WoundAnalysisRecord
-from app.models.image_quality_result import ImageQualityResult
-from app.models.wound_assessment import WoundAssessment
-from app.models.wound_image import WoundImage
+
 from app.schemas.wound import (
     AssessmentListResponse,
     AssessmentSummary,
@@ -50,7 +47,6 @@ from app.schemas.wound import (
 )
 from app.services.image_decoder import decode_image
 from app.services.image_quality import assess_image_quality
-from app.utils.file_storage import save_image_to_disk
 from app.repository.wound_repository import WoundAssessmentRepository
 
 logger = logging.getLogger(__name__)
@@ -111,18 +107,10 @@ class WoundService:
             for image in images:
                 image_bytes = await image.read()
 
-                # Save the image to disk
-                image_path = save_image_to_disk(
-                    image_bytes,
-                    assessment_id,
-                    image.filename or "wound_image.jpg",
-                )
-
                 # Run the analysis pipeline and persist results
                 result_dict = self.process_wound_image(
-                    image_bytes=image_bytes,
                     assessment_id=assessment_id,
-                    image_path=image_path,
+                    image_bytes=image_bytes,
                     original_filename=image.filename,
                     content_type=image.content_type,
                     duration=patient.duration,
@@ -156,7 +144,6 @@ class WoundService:
         self,
         image_bytes: bytes,
         assessment_id: uuid.UUID,
-        image_path: str,
         original_filename: str | None = None,
         content_type: str | None = None,
         duration: str | None = None,
@@ -197,16 +184,14 @@ class WoundService:
         """
         logger.info("Starting analyzing wound image")
 
-        # Step 1: Decode the raw bytes into a NumPy BGR image array.
         img = decode_image(image_bytes)
 
-        # Step 2: Compute quality metrics and enforce minimum thresholds.
         quality = assess_image_quality(img)
 
         # ── Persist the image record ──────────────────────────────────────────
         wound_image = self.repository.save_image_record(
             assessment_id=assessment_id,
-            image_path=image_path,
+            image_bytes=image_bytes,
             original_filename=original_filename,
             content_type=content_type,
         )
@@ -223,11 +208,10 @@ class WoundService:
         if not quality["is_valid"]:
             raise ImageQualityError("Image quality too low")
 
-        # Step 3: Run AI inference on the validated image.
         model_output = classify_wound(img)
         logger.info("AI model inference complete.")
 
-        # Step 4: Apply the deterministic rule engine to the model output.
+        # Apply the deterministic rule engine to the model output.
         patient_context = {"duration": duration} if duration else None
         assessment = _wound_engine.assess(model_output, patient_context=patient_context)
         logger.info(
