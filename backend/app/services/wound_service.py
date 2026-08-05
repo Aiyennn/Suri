@@ -111,7 +111,7 @@ class WoundService:
                     image_path=image_path,
                     original_filename=image.filename,
                     content_type=image.content_type,
-                    duration=requests.duration,
+                    duration=request.duration,
                 )
     
                 # Validate and deserialize the engine output
