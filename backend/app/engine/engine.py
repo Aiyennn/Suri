@@ -1,12 +1,5 @@
 """
-engine/engine.py
-================
 Wound Assessment Engine — public orchestrator.
-
-``WoundAssessmentEngine`` is the single entry point for external callers.
-It wires together all sub-components and exposes a single ``assess()`` method
-that accepts raw AI model output and returns a fully structured
-``AssessmentResult``.
 
 Pipeline
 --------
@@ -37,30 +30,6 @@ logger = logging.getLogger(__name__)
 
 
 class WoundAssessmentEngine:
-    """
-    Deterministic wound-assessment rule engine.
-
-    Accepts structured output from an AI vision model and produces a fully
-    explainable, reproducible ``AssessmentResult``.
-
-    All sub-components are injected via constructor parameters, which makes
-    the engine trivially testable with alternative implementations.
-
-    Parameters
-    ----------
-    evaluator:
-        Optional custom :class:`RuleEvaluator`.  Defaults to a
-        ``RuleEvaluator`` backed by the global ``rule_registry``.
-    scorer:
-        Optional custom :class:`RiskScorer`.  Defaults to a ``RiskScorer``
-        with the standard score thresholds.
-    recommendation_engine:
-        Optional custom :class:`RecommendationBuilder`.
-    referral_engine:
-        Optional custom :class:`ReferralChecker`.
-    follow_up_scheduler:
-        Optional custom :class:`FollowUpScheduler`.
-    """
 
     def __init__(
         self,
@@ -77,27 +46,9 @@ class WoundAssessmentEngine:
         self._follow_up = follow_up_scheduler or FollowUpScheduler()
 
     def assess(self, raw_model_output: dict, patient_context: dict | None = None) -> AssessmentResult:
-        """
-        Run the full deterministic assessment pipeline.
 
-        Parameters
-        ----------
-        raw_model_output:
-            Unvalidated dictionary produced by the AI vision model.
-        patient_context:
-            Optional patient-supplied context (e.g. ``{"duration": "1-3 Days"}``).
-            Relevant fields are merged into the engine input before validation.
+        # Run assessment pipeline
 
-        Returns
-        -------
-        AssessmentResult
-            Fully structured, explainable assessment output.
-
-        Raises
-        ------
-        InputValidationError
-            If ``raw_model_output`` does not conform to the expected schema.
-        """
         logger.info("WoundAssessmentEngine.assess() — starting pipeline.")
 
         # 1. Validate — merge patient context before validation
