@@ -56,7 +56,7 @@ class WoundAssessmentEngine:
 
         engine_input = dict(raw_model_output)
         if patient_context:
-            if patient_context.get("duration"):
+            if "duration" in patient_context:
                 engine_input["duration"] = patient_context["duration"]
 
         assessment_input = validate_input(engine_input)

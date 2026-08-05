@@ -7,12 +7,13 @@ All routes in this module are mounted under the ``/wound`` prefix by
 ``main.py``, so the full paths are:
 
     POST /wound/analyze   – Submit patient info + wound images for analysis.
+    GET  /wound/assessments – List all past assessment sessions.
 
-Request format:
+Request format for POST /wound/analyze:
     multipart/form-data with the following fields:
         age            (str)  – Patient age.
         sex            (str)  – Patient biological sex: 'male', 'female', or 'other'.
-        symptoms       (str)  – JSON-encoded list of symptom strings.
+        symptoms       (str)  – JSON-encoded array of symptom strings.
         duration       (str)  – How long the wound has been present.
         medical_history(str)  – Relevant medical background.
         images         (file[])– One or more wound images (JPEG/PNG).
@@ -35,7 +36,7 @@ from app.repository.wound_repository import WoundAssessmentRepository
 from app.dependencies import get_db
 from app.schemas.wound import (
     AssessmentListResponse,
-    WoundAnalysisRequest,
+    PatientInfo,
     WoundAnalysisResponse,
 )
 from app.services.wound_service import WoundService
@@ -58,21 +59,20 @@ router = APIRouter()
     ),
 )
 async def analyze_wound(
-    request: WoundAnalysisRequest = Depends(WoundAnalysisRequest.from_form),
+    patient: PatientInfo = Depends(PatientInfo.from_form),
     images: list[UploadFile] = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-
     repository = WoundAssessmentRepository(db)
     service = WoundService(repository)
 
     try:
-        result = await service.analyze_wound(request, images)
+        result = await service.analyze_wound(patient, images)
         db.commit()
         return result
-    except:
+    except Exception:
         db.rollback()
-        print("Wound Analysis Failed") # Change into custom error
+        logger.exception("Wound analysis failed (age=%s sex=%s)", patient.age, patient.sex)
         raise
 
 
@@ -98,6 +98,6 @@ def list_assessments(
     try:
         result = service.get_assessments(limit, offset)
         return result
-    except:
-        print("get list_assessments failed")
+    except Exception:
+        logger.exception("list_assessments failed (limit=%d offset=%d)", limit, offset)
         raise

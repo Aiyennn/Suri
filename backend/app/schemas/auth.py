@@ -11,6 +11,7 @@ These schemas define:
 from __future__ import annotations
 
 from datetime import date
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
@@ -30,7 +31,8 @@ class UserRegisterRequest(BaseModel):
     password: str = Field(
         ...,
         min_length=8,
-        description="Password (min 8 characters). Will be bcrypt-hashed before storage.",
+        max_length=128,
+        description="Password (8–128 characters). Will be bcrypt-hashed before storage.",
         examples=["s3cur3P@ss!"],
     )
     full_name: str = Field(
@@ -45,7 +47,7 @@ class UserRegisterRequest(BaseModel):
         description="Optional date of birth (ISO 8601 date string).",
         examples=["1990-06-15"],
     )
-    sex: str | None = Field(
+    sex: Literal["male", "female", "other"] | None = Field(
         None,
         description="Biological sex: 'male', 'female', or 'other'.",
         examples=["female"],

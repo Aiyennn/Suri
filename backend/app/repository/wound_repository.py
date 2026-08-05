@@ -14,7 +14,7 @@ class WoundAssessmentRepository:
 
     def create_assessment(
             self,
-            age: int,
+            age: str,
             sex: str,
             symptoms: list[str],
             duration: str,
@@ -56,9 +56,9 @@ class WoundAssessmentRepository:
             self,
             image_id: uuid.UUID,
             is_valid: bool,
-            blur: int,
-            brightness: int,
-            contrast: int,
+            blur: float,
+            brightness: float,
+            contrast: float,
     ) -> ImageQualityResult:
         quality_record = ImageQualityResult(
             image_id=image_id,

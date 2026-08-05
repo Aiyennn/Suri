@@ -9,6 +9,13 @@ These schemas define:
 
 Using explicit schemas keeps the API contract predictable and enables
 automatic OpenAPI documentation via FastAPI.
+
+Design note — single request schema
+------------------------------------
+``PatientInfo`` is the *sole* request schema for POST /wound/analyze.
+It includes a ``from_form`` classmethod so FastAPI can bind it directly
+from a multipart/form-data request, replacing the former ``WoundAnalysisRequest``
+stub which duplicated every field without any validation constraints.
 """
 
 from __future__ import annotations
@@ -20,11 +27,17 @@ from fastapi import Form
 from pydantic import BaseModel, Field, field_validator
 
 # ---------------------------------------------------------------------------
-# Request schemas
+# Request schema  (also used verbatim in the response body)
 # ---------------------------------------------------------------------------
 
 class PatientInfo(BaseModel):
-    """Demographic and clinical information supplied by the clinician."""
+    """
+    Demographic and clinical information supplied by the clinician.
+
+    Used as both:
+    - The validated API request body for POST /wound/analyze (via ``from_form``).
+    - The echoed patient context inside ``WoundAnalysisResponse``.
+    """
 
     age: str = Field(
         ...,
@@ -58,17 +71,13 @@ class PatientInfo(BaseModel):
         """Accept a JSON-encoded string (from multipart form) or a plain list."""
         if isinstance(v, str):
             try:
-                return json.loads(v)
+                parsed = json.loads(v)
             except json.JSONDecodeError:
-                raise ValueError("symptoms must be a valid JSON list, e.g. '[\"redness\"]'")
+                raise ValueError("symptoms must be a valid JSON array, e.g. '[\"redness\"]'")
+            if not isinstance(parsed, list):
+                raise ValueError("symptoms must be a JSON array, not a scalar or object.")
+            return parsed
         return v
-
-class WoundAnalysisRequest(BaseModel):
-    age: str
-    sex: str
-    symptoms: list[str]
-    duration: str
-    medical_history: str
 
     @classmethod
     def from_form(
@@ -78,11 +87,20 @@ class WoundAnalysisRequest(BaseModel):
         symptoms: str = Form(...),
         duration: str = Form(...),
         medical_history: str = Form(...),
-    ):
+    ) -> "PatientInfo":
+        """
+        FastAPI ``Depends``-compatible constructor for multipart/form-data.
+
+        FastAPI cannot natively bind Pydantic models from form fields, so
+        this classmethod accepts each field as a raw ``Form(...)`` parameter
+        and delegates to the normal Pydantic constructor — meaning all field
+        validators (including ``parse_symptoms`` and the ``sex`` Literal check)
+        run exactly once at the API boundary.
+        """
         return cls(
             age=age,
             sex=sex,
-            symptoms=json.loads(symptoms),
+            symptoms=symptoms,   # parse_symptoms validator handles JSON decoding
             duration=duration,
             medical_history=medical_history,
         )

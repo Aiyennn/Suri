@@ -17,14 +17,18 @@ scheduling are produced exclusively by the rule engine (step 4).
 
 After the pipeline completes, the results (image metadata, quality metrics,
 and analysis output) are persisted to the database.
+
+Validation boundary note
+-------------------------
+``PatientInfo`` (from ``schemas/wound.py``) is constructed once by FastAPI
+at the API boundary, with all field validators already applied.  The service
+receives a fully-validated object and does not re-validate it.
 """
 
 import logging
 import uuid
 
 from fastapi import UploadFile
-from pydantic import ValidationError
-from sqlalchemy import func
 
 from app.ai.model import classify_wound
 from app.engine import WoundAssessmentEngine
@@ -32,7 +36,6 @@ from app.exceptions import (
     ImageQualityError,
     InternalServerError,
     InvalidImageError,
-    InvalidPatientDataError,
 )
 from app.models.analysis_result import WoundAnalysisRecord
 from app.models.image_quality_result import ImageQualityResult
@@ -42,7 +45,6 @@ from app.schemas.wound import (
     AssessmentListResponse,
     AssessmentSummary,
     PatientInfo,
-    WoundAnalysisRequest,
     WoundAnalysisResponse,
     WoundAnalysisResult,
 )
@@ -63,47 +65,59 @@ class WoundService:
 
     async def analyze_wound(
             self,
-            request: WoundAnalysisRequest,
+            patient: PatientInfo,
             images: list[UploadFile],
             ) -> WoundAnalysisResponse:
+        """
+        Orchestrate the full wound-analysis pipeline for one submission.
 
-        # Validate patient info
-        try:
-            patient = PatientInfo(
-                age=request.age,
-                sex=request.sex,
-                symptoms=request.symptoms,
-                duration=request.duration,
-                medical_history=request.medical_history,
-            )
-        except ValidationError as exc:
-            raise InvalidPatientDataError(exc.errors()) from exc
+        Parameters
+        ----------
+        patient:
+            Fully-validated patient demographics, bound and validated by
+            FastAPI at the API boundary.  No re-validation is performed here.
+        images:
+            One or more uploaded wound images to process.
 
-        # Create patient record
+        Returns
+        -------
+        WoundAnalysisResponse
+            Combined patient context and per-image analysis results.
+
+        Raises
+        ------
+        InvalidImageError
+            If any uploaded file is not a valid/decodable image.
+        ImageQualityError
+            If any image passes decoding but fails the quality gate.
+        InternalServerError
+            On any unexpected error during pipeline execution.
+        """
+        # Create patient record in the database.
         try:
             assessment = self.repository.create_assessment(
-                age=request.age,
-                sex=request.sex,
-                symptoms=request.symptoms,
-                duration=request.duration,
-                medical_history=request.medical_history,
+                age=patient.age,
+                sex=patient.sex,
+                symptoms=patient.symptoms,
+                duration=patient.duration,
+                medical_history=patient.medical_history,
             )
-    
+
             assessment_id = assessment.id
             logger.info("Created assessment %s", assessment_id)
-    
-            # ── Steps 3-8: Process each image through the pipeline ────────────
+
+            # ── Process each image through the pipeline ────────────────────
             image_results: list[WoundAnalysisResult] = []
             for image in images:
                 image_bytes = await image.read()
-    
+
                 # Save the image to disk
                 image_path = save_image_to_disk(
                     image_bytes,
                     assessment_id,
                     image.filename or "wound_image.jpg",
                 )
-    
+
                 # Run the analysis pipeline and persist results
                 result_dict = self.process_wound_image(
                     image_bytes=image_bytes,
@@ -111,28 +125,29 @@ class WoundService:
                     image_path=image_path,
                     original_filename=image.filename,
                     content_type=image.content_type,
-                    duration=request.duration,
+                    duration=patient.duration,
                 )
-    
+
                 # Validate and deserialize the engine output
                 image_results.append(WoundAnalysisResult.model_validate(result_dict))
-    
+
             return WoundAnalysisResponse(
                 assessment_id=str(assessment_id),
                 patient=patient,
                 results=image_results,
             )
-        
-        except ImageQualityError as exc:
-            raise InvalidImageError(exc.reason)
-        
+
+        except (InvalidImageError, ImageQualityError):
+            # Let the API layer's exception handlers translate these to HTTP 422.
+            raise
+
         except Exception as exc:
             logger.exception(
                 "Unexpected error during wound analysis "
                 "(images=%d age=%s sex=%s)",
                 len(images),
-                request.age,
-                request.sex,
+                patient.age,
+                patient.sex,
             )
             raise InternalServerError() from exc
 
@@ -152,8 +167,6 @@ class WoundService:
 
         Parameters
         ----------
-        db:
-            Active SQLAlchemy session (caller manages the transaction).
         image_bytes:
             Raw bytes of the uploaded wound image.
         assessment_id:
@@ -175,7 +188,9 @@ class WoundService:
 
         Raises
         ------
-        ValueError
+        InvalidImageError
+            If the image bytes cannot be decoded by OpenCV.
+        ImageQualityError
             If the image quality is below the minimum acceptable threshold.
         engine.validation.InputValidationError
             If the AI model output does not conform to the expected schema.
@@ -293,4 +308,3 @@ class WoundService:
                 )
 
             return AssessmentListResponse(total=total, assessments=summaries)
-        
