@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 
 // ── Tab data model ────────────────────────────────────────────────────────────
@@ -40,13 +39,13 @@ const _tabs = [
   ),
 ];
 
-// ── Bottom nav bar ────────────────────────────────────────────────────────────
+// ── Floating pill nav bar ─────────────────────────────────────────────────────
 
-/// Bottom navigation bar with 4 tabs and a smooth sliding pill indicator.
+/// A floating, pill-shaped bottom navigation bar.
 ///
-/// The pill slides between tabs with a spring-like cubic curve.
-/// Icons cross-fade between outlined/filled variants, scale up on activation,
-/// and labels transition their weight and colour — all simultaneously.
+/// Sits above the screen bottom edge with horizontal + vertical margin.
+/// The active tab shows a bright pill indicator behind the icon/label.
+/// All transitions (pill position, icon swap, label weight) are animated.
 class BottomNavBar extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -62,8 +61,6 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  // Previous index tracked so TweenAnimationBuilder always starts the pill
-  // animation from the last selected tab.
   double _pillFrom = 0;
 
   @override
@@ -76,83 +73,122 @@ class _BottomNavBarState extends State<BottomNavBar> {
   void didUpdateWidget(BottomNavBar old) {
     super.didUpdateWidget(old);
     if (old.currentIndex != widget.currentIndex) {
-      // Begin the next tween from wherever the pill currently is.
       _pillFrom = old.currentIndex.toDouble();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Outer padding gives the "floating" effect — space from screen edges.
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        child: _FloatingPill(
+          currentIndex: widget.currentIndex,
+          pillFrom: _pillFrom,
+          onTap: widget.onTap,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Pill container ────────────────────────────────────────────────────────────
+
+class _FloatingPill extends StatelessWidget {
+  final int currentIndex;
+  final double pillFrom;
+  final ValueChanged<int> onTap;
+
+  const _FloatingPill({
+    required this.currentIndex,
+    required this.pillFrom,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     const tabCount = 4;
-    const barHeight = 64.0;
-    // Line indicator dimensions
-    const lineH = 3.0;
-    const lineW = 28.0;
+    const barH    = 62.0;
+    const navBg   = Color(0xFF2563EB); // app blue
 
     return Container(
+      height: barH,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: navBg,
+        borderRadius: BorderRadius.circular(barH / 2),
         boxShadow: [
+          // Ambient shadow
           BoxShadow(
-            color: AppColors.shadowMedium,
-            blurRadius: 20,
-            offset: const Offset(0, -4),
+            color: const Color(0xFF172554).withValues(alpha: 0.35),
+            blurRadius: 28,
+            spreadRadius: 0,
+            offset: const Offset(0, 10),
+          ),
+          // Tight shadow for depth
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: barHeight,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final tabW = constraints.maxWidth / tabCount;
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(barH / 2),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final tabW = constraints.maxWidth / tabCount;
 
-              return TweenAnimationBuilder<double>(
-                tween: Tween(
-                  begin: _pillFrom,
-                  end: widget.currentIndex.toDouble(),
-                ),
-                duration: const Duration(milliseconds: 350),
-                curve: Curves.easeInOutCubic,
-                builder: (context, animPos, _) {
-                  // Align line to the active tab's full width.
-                  final lineLeft = animPos * tabW;
+            // Active pill indicator dimensions
+            const pillH  = 42.0;
+            const pillW  = 76.0;
 
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      // ── Sliding top-line indicator ──────────────────────
-                      Positioned(
-                        left: lineLeft,
-                        top: 0,
-                        child: Container(
-                          width: tabW,
-                          height: lineH,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(lineH / 2),
-                          ),
+            return TweenAnimationBuilder<double>(
+              tween: Tween(
+                begin: pillFrom,
+                end: currentIndex.toDouble(),
+              ),
+              duration: const Duration(milliseconds: 380),
+              curve: Curves.easeInOutCubic,
+              builder: (context, animPos, _) {
+                final pillLeft = animPos * tabW + (tabW - pillW) / 2;
+
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // ── Animated active pill ─────────────────────────────
+                    Positioned(
+                      left: pillLeft,
+                      top: (barH - pillH) / 2,
+                      child: Container(
+                        width: pillW,
+                        height: pillH,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(pillH / 2),
                         ),
                       ),
+                    ),
 
-                      // ── Tab items ───────────────────────────────────────
-                      Row(
-                        children: List.generate(tabCount, (i) {
-                          return _NavItem(
-                            data: _tabs[i],
-                            isActive: i == widget.currentIndex,
-                            tabWidth: tabW,
-                            onTap: () => widget.onTap(i),
-                          );
-                        }),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
+                    // ── Tab items ────────────────────────────────────────
+                    Row(
+                      children: List.generate(tabCount, (i) {
+                        return _NavItem(
+                          data: _tabs[i],
+                          isActive: i == currentIndex,
+                          tabWidth: tabW,
+                          barHeight: barH,
+                          onTap: () => onTap(i),
+                        );
+                      }),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
         ),
       ),
     );
@@ -165,19 +201,23 @@ class _NavItem extends StatelessWidget {
   final _TabData data;
   final bool isActive;
   final double tabWidth;
+  final double barHeight;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.data,
     required this.isActive,
     required this.tabWidth,
+    required this.barHeight,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final activeColor   = AppColors.navActive;
-    final inactiveColor = AppColors.navInactive;
+    // Active: navy text/icons to contrast against white pill
+    // Inactive: white at 70% so they're visible on blue bg
+    final activeColor   = const Color(0xFF1E3A8A);
+    final inactiveColor = Colors.white.withValues(alpha: 0.75);
     final color         = isActive ? activeColor : inactiveColor;
 
     return Semantics(
@@ -189,18 +229,18 @@ class _NavItem extends StatelessWidget {
         onTap: onTap,
         child: SizedBox(
           width: tabWidth,
-          height: 64,
+          height: barHeight,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon — scale + cross-fade between filled/outlined variants
+              // Icon — scale up + cross-fade on activation
               AnimatedScale(
-                scale: isActive ? 1.15 : 1.0,
-                duration: const Duration(milliseconds: 250),
+                scale: isActive ? 1.12 : 1.0,
+                duration: const Duration(milliseconds: 280),
                 curve: Curves.easeOutBack,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
-                  switchInCurve:  Curves.easeOut,
+                  switchInCurve: Curves.easeOut,
                   switchOutCurve: Curves.easeIn,
                   transitionBuilder: (child, anim) => FadeTransition(
                     opacity: anim,
@@ -209,23 +249,25 @@ class _NavItem extends StatelessWidget {
                   child: Icon(
                     isActive ? data.activeIcon : data.icon,
                     key: ValueKey(isActive),
-                    size: 22,
+                    size: 20,
                     color: color,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
 
-              // Label — weight + colour transition
+              // Label — smooth weight + colour transition
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
                 style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                  fontSize: 10,
+                  fontFamily: 'Inter',
+                  fontWeight:
+                      isActive ? FontWeight.w700 : FontWeight.w400,
                   color: color,
-                  letterSpacing: isActive ? 0.2 : 0,
+                  letterSpacing: isActive ? 0.3 : 0,
                 ),
                 child: Text(data.label),
               ),

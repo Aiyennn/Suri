@@ -34,6 +34,7 @@ class ShellPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: child,
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex(context),

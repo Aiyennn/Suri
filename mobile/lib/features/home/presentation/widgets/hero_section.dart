@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/widgets/hipaa_badge.dart';
 
 /// Hero section with gradient background, medical illustration, and HIPAA badge.
 class HeroSection extends StatelessWidget {
