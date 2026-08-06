@@ -63,6 +63,7 @@ class WoundService:
             self,
             patient: PatientInfo,
             images: list[UploadFile],
+            user_id: uuid.UUID,
             ) -> WoundAnalysisResponse:
         """
         Orchestrate the full wound-analysis pipeline for one submission.
@@ -92,6 +93,7 @@ class WoundService:
         # Create patient record in the database.
         try:
             assessment = self.repository.create_assessment(
+                user_id=user_id,
                 age=patient.age,
                 sex=patient.sex,
                 symptoms=patient.symptoms,
@@ -258,11 +260,14 @@ class WoundService:
 
     def get_assessments(
                 self,
+                user_id: uuid.UUID,
                 limit: int,
                 offset: int,
         ) -> AssessmentListResponse:
 
-            assessments, total = self.repository.get_assessments_with_count(limit, offset)
+            assessments, total = self.repository.get_assessments_with_count(
+                user_id, limit, offset
+            )
 
             summaries: list[AssessmentSummary] = []
             for assessment in assessments:

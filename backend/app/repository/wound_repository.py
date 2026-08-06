@@ -14,6 +14,7 @@ class WoundAssessmentRepository:
 
     def create_assessment(
             self,
+            user_id: uuid.UUID,
             age: str,
             sex: str,
             symptoms: list[str],
@@ -21,6 +22,7 @@ class WoundAssessmentRepository:
             medical_history: str,
     ) -> WoundAssessment:
         assessment = WoundAssessment(
+            user_id=user_id,
             patient_age=age,
             patient_sex=sex,
             symptoms=symptoms,
@@ -107,15 +109,19 @@ class WoundAssessmentRepository:
         return analysis_record
 
     def get_assessments_with_count(
-            self,
-            limit: int,
-            offset: int,
+    self,
+    user_id: uuid.UUID,
+    limit: int,
+    offset: int,
     ) -> tuple[list[WoundAssessment], int]:
-        total = self.db.query(func.count(WoundAssessment.id)).scalar() or 0
+        query = self.db.query(WoundAssessment).filter(
+            WoundAssessment.user_id == user_id
+        )
+
+        total = query.count()
 
         rows = (
-            self.db.query(WoundAssessment)
-            .order_by(WoundAssessment.created_at.desc())
+            query.order_by(WoundAssessment.created_at.desc())
             .offset(offset)
             .limit(limit)
             .all()

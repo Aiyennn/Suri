@@ -32,6 +32,8 @@ import logging
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 from app.repository.wound_repository import WoundAssessmentRepository
+from app.models.user import User
+from app.services.auth_service import get_current_user
 
 from app.dependencies import get_db
 from app.schemas.wound import (
@@ -62,12 +64,13 @@ async def analyze_wound(
     patient: PatientInfo = Depends(PatientInfo.from_form),
     images: list[UploadFile] = File(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     repository = WoundAssessmentRepository(db)
     service = WoundService(repository)
 
     try:
-        result = await service.analyze_wound(patient, images)
+        result = await service.analyze_wound(patient, images, current_user.id)
         db.commit()
         return result
     except Exception:
@@ -90,13 +93,14 @@ def list_assessments(
     limit: int = 50,
     offset: int = 0,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ) -> AssessmentListResponse:
 
     repository = WoundAssessmentRepository(db)
     service = WoundService(repository)
 
     try:
-        result = service.get_assessments(limit, offset)
+        result = service.get_assessments(current_user.id, limit, offset)
         return result
     except Exception:
         logger.exception("list_assessments failed (limit=%d offset=%d)", limit, offset)
