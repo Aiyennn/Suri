@@ -1,25 +1,33 @@
 import 'package:flutter/material.dart';
 
-/// Centralized color palette for the Medical Triage app.
-/// Extracted from UI screenshots.
+/// Centralized color palette for the Suri app.
 abstract final class AppColors {
-  // Primary
-  static const Color primary = Color(0xFF1A56DB);
-  static const Color primaryDark = Color(0xFF1E40AF);
-  static const Color primaryLight = Color(0xFFE8F0FE);
-  static const Color primarySurface = Color(0xFFF0F5FF);
+  // Primary — #2563EB blue
+  static const Color primary = Color(0xFF2563EB);
+  static const Color primaryDark = Color(0xFF1D4ED8);
+  static const Color primaryLight = Color(0xFFEFF6FF);
+  static const Color primarySurface = Color(0xFFEFF6FF);
+
+  // Secondary — #14B8A6 teal (used for gradient end)
+  static const Color secondary = Color(0xFF14B8A6);
+  static const Color secondaryLight = Color(0xFFCCFBF1);
 
   // Surfaces & Backgrounds
   static const Color surface = Color(0xFFFFFFFF);
   static const Color background = Color(0xFFF8FAFC);
-  static const Color scaffoldBg = Color(0xFFF9FAFB);
-  static const Color cardBorder = Color(0xFFE5E7EB);
-  static const Color divider = Color(0xFFF3F4F6);
+  static const Color scaffoldBg = Color(0xFFF8FAFC);
+  static const Color cardBorder = Color(0xFFE2E8F0);
+  static const Color divider = Color(0xFFF1F5F9);
+
+  // Dark-mode surfaces
+  static const Color surfaceDark = Color(0xFF1E293B);
+  static const Color scaffoldBgDark = Color(0xFF0F172A);
+  static const Color cardBorderDark = Color(0xFF334155);
 
   // Text
-  static const Color textPrimary = Color(0xFF111827);
-  static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textTertiary = Color(0xFF9CA3AF);
+  static const Color textPrimary = Color(0xFF0F172A);
+  static const Color textSecondary = Color(0xFF64748B);
+  static const Color textTertiary = Color(0xFF94A3B8);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
   // Status
@@ -38,13 +46,16 @@ abstract final class AppColors {
   static const Color urgencyLow = Color(0xFF22C55E);
 
   // Bottom nav
-  static const Color navInactive = Color(0xFF9CA3AF);
-  static const Color navActive = Color(0xFF1A56DB);
+  static const Color navInactive = Color(0xFF94A3B8);
+  static const Color navActive = Color(0xFF2563EB);
 
   // Chip / Badge
   static const Color chipBg = Color(0xFFEFF6FF);
-  static const Color chipSelectedBg = Color(0xFF1A56DB);
-  static const Color chipText = Color(0xFF1E40AF);
+  static const Color chipSelectedBg = Color(0xFF2563EB);
+  static const Color chipText = Color(0xFF1D4ED8);
+
+  // Login gradient
+  static const List<Color> loginButtonGradient = [primary, secondary];
 
   // Shadow
   static const Color shadowLight = Color(0x0A000000);

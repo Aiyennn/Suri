@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../data/repositories/assessment_repository_impl.dart';
 import '../../domain/entities/assessment.dart';
 import '../../domain/entities/patient.dart';
@@ -106,13 +107,17 @@ final runAssessmentUseCaseProvider = Provider<RunAssessment>((ref) {
 /// Main assessment state provider.
 final assessmentProvider =
     StateNotifierProvider<AssessmentNotifier, AssessmentState>((ref) {
-  return AssessmentNotifier(ref.read(runAssessmentUseCaseProvider));
+  return AssessmentNotifier(ref.read(runAssessmentUseCaseProvider), ref);
 });
 
 class AssessmentNotifier extends StateNotifier<AssessmentState> {
   final RunAssessment _runAssessment;
 
-  AssessmentNotifier(this._runAssessment) : super(const AssessmentState());
+  /// Retained so the notifier can read [currentTokenProvider] at call-time.
+  final Ref _ref;
+
+  AssessmentNotifier(this._runAssessment, this._ref)
+      : super(const AssessmentState());
 
   // ─── Patient Details ───
 
@@ -199,9 +204,11 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
       // server.  Once the upload completes, the server runs the analysis
       // pipeline and returns the result.  The analysis steps are animated
       // in parallel to give the user visual feedback during processing.
+      final token = _ref.read(currentTokenProvider) ?? '';
       final analysisFuture = _runAssessment(
         patient: state.patient,
         imagePaths: state.uploadedImagePaths,
+        token: token,
         onUploadProgress: (sent, total) {
           if (!mounted) return;
           final progress = total > 0 ? (sent / total).clamp(0.0, 1.0) : 0.0;

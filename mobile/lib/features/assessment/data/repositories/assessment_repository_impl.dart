@@ -27,6 +27,7 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
   Future<Assessment> runAssessment({
     required Patient patient,
     required List<String> imagePaths,
+    required String token,
     UploadProgressCallback? onUploadProgress,
   }) async {
     final uri = Uri.parse('${ApiConstants.baseUrl}$_woundEndpoint');
@@ -85,6 +86,7 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
         'content-type',
         multipart.headers['content-type'] ?? 'multipart/form-data',
       );
+      request.headers.set('Authorization', 'Bearer $token');
       request.contentLength = totalBytes;
 
       // 6. Stream the body through, counting bytes for progress.

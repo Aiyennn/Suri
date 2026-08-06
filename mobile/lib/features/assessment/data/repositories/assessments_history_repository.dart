@@ -12,6 +12,7 @@ class AssessmentsHistoryRepository {
       : _client = client ?? http.Client();
 
   Future<AssessmentHistoryResponse> fetchAssessments({
+    required String token,
     int limit = 50,
     int offset = 0,
   }) async {
@@ -20,7 +21,12 @@ class AssessmentsHistoryRepository {
       '?limit=$limit&offset=$offset',
     );
 
-    final response = await _client.get(uri);
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode != 200) {
       throw Exception(

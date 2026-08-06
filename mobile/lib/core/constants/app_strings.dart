@@ -1,6 +1,6 @@
 /// Centralized string constants for the app.
 abstract final class AppStrings {
-  static const String appName = 'Medical Triage';
+  static const String appName = 'Suri';
 
   // Home
   static const String secureAi = 'Secure AI';
@@ -102,9 +102,11 @@ abstract final class AppStrings {
   static const String profile = 'Profile';
 
   // Auth — Login
-  static const String welcomeBack = 'Welcome back';
-  static const String loginSubtitle = 'Sign in to continue your AI health assessments.';
+  static const String welcomeBack = 'Welcome Back';
+  static const String loginSubtitle =
+      'Sign in to continue to your trusted medical companion.';
   static const String signIn = 'Sign In';
+  static const String forgotPassword = 'Forgot Password?';
   static const String noAccount = "Don't have an account?";
   static const String signUp = 'Sign Up';
 

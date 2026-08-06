@@ -11,11 +11,13 @@ class RunAssessment {
   Future<Assessment> call({
     required Patient patient,
     required List<String> imagePaths,
+    required String token,
     UploadProgressCallback? onUploadProgress,
   }) {
     return _repository.runAssessment(
       patient: patient,
       imagePaths: imagePaths,
+      token: token,
       onUploadProgress: onUploadProgress,
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../data/repositories/assessments_history_repository.dart';
 import '../../domain/entities/assessment_history.dart';
 
@@ -41,13 +42,18 @@ class AssessmentsHistoryNotifier
     extends StateNotifier<AssessmentsHistoryState> {
   final AssessmentsHistoryRepository _repo;
 
-  AssessmentsHistoryNotifier(this._repo)
+  /// [Ref] is retained so the notifier can read [currentTokenProvider]
+  /// at call-time, picking up the latest token even after a token refresh.
+  final Ref _ref;
+
+  AssessmentsHistoryNotifier(this._repo, this._ref)
       : super(const AssessmentsHistoryInitial());
 
   Future<void> load() async {
     state = const AssessmentsHistoryLoading();
     try {
-      final result = await _repo.fetchAssessments();
+      final token = _ref.read(currentTokenProvider) ?? '';
+      final result = await _repo.fetchAssessments(token: token);
       state = AssessmentsHistoryLoaded(
         items: result.assessments,
         total: result.total,
@@ -66,5 +72,6 @@ final assessmentsHistoryProvider = StateNotifierProvider<
     AssessmentsHistoryNotifier, AssessmentsHistoryState>((ref) {
   return AssessmentsHistoryNotifier(
     ref.read(assessmentsHistoryRepositoryProvider),
+    ref,
   );
 });
