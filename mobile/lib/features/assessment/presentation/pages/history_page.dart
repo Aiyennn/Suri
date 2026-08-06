@@ -35,10 +35,8 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      appBar: AppTopBar(
-        title: AppStrings.appName,
-        stepText: AppStrings.history,
-        showBack: false,
+      appBar: const AppTopBar(
+        title: AppStrings.history,
       ),
       body: _buildBody(historyState),
     );

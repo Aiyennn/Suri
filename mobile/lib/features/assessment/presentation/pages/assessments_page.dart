@@ -20,10 +20,8 @@ class AssessmentsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      appBar: AppTopBar(
-        title: AppStrings.appName,
-        stepText: AppStrings.assessments,
-        showBack: false,
+      appBar: const AppTopBar(
+        title: AppStrings.assessments,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),

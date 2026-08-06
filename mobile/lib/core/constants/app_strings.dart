@@ -100,6 +100,7 @@ abstract final class AppStrings {
   static const String assessments = 'Assessments';
   static const String history = 'History';
   static const String profile = 'Profile';
+  static const String clinic = 'Clinic';
 
   // Auth — Login
   static const String welcomeBack = 'Welcome Back';

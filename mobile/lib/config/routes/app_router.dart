@@ -22,6 +22,7 @@ abstract final class RoutePaths {
   static const String assessments = '/assessments';
   static const String history = '/history';
   static const String profile = '/profile';
+  static const String clinic = '/clinic';
   static const String patientDetails = '/assessment/patient-details';
   static const String uploadImages = '/assessment/upload-images';
   static const String analyzing = '/assessment/analyzing';
@@ -96,9 +97,9 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: RoutePaths.profile,
+            path: RoutePaths.clinic,
             pageBuilder: (context, state) => const NoTransitionPage(
-              child: _PlaceholderPage(title: 'Profile'),
+              child: _PlaceholderPage(title: 'Clinic'),
             ),
           ),
         ],

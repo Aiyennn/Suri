@@ -14,7 +14,7 @@ class ShellPage extends StatelessWidget {
     final location = GoRouterState.of(context).uri.toString();
     if (location.startsWith(RoutePaths.assessments)) return 1;
     if (location.startsWith(RoutePaths.history)) return 2;
-    if (location.startsWith(RoutePaths.profile)) return 3;
+    if (location.startsWith(RoutePaths.clinic)) return 3;
     return 0;
   }
 
@@ -27,7 +27,7 @@ class ShellPage extends StatelessWidget {
       case 2:
         context.go(RoutePaths.history);
       case 3:
-        context.go(RoutePaths.profile);
+        context.go(RoutePaths.clinic);
     }
   }
 

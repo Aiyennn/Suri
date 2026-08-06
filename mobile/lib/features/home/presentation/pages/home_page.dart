@@ -19,8 +19,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AppTopBar(
-        title: AppStrings.appName,
-        stepText: 'Step 1 of 5',
+        title: AppStrings.home,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
