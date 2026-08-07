@@ -7,7 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../shared/widgets/app_top_bar.dart';
+import '../../../../shared/widgets/app_nav_bar.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../../domain/entities/assessment_history.dart';
 import '../providers/assessments_history_provider.dart';
@@ -35,10 +35,21 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      appBar: const AppTopBar(
-        title: AppStrings.history,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Navbar ─────────────────────────────────────────────────────
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              child: AppNavBar(),
+            ),
+
+            // ── Body content ──────────────────────────────────────────────
+            Expanded(child: _buildBody(historyState)),
+          ],
+        ),
       ),
-      body: _buildBody(historyState),
     );
   }
 

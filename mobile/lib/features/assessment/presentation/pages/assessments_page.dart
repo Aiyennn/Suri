@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../shared/widgets/app_top_bar.dart';
+import '../../../../shared/widgets/app_nav_bar.dart';
 import '../../../../shared/widgets/primary_button.dart';
 
 /// Assessments landing page — entry point for starting a new AI wound assessment.
@@ -20,11 +20,20 @@ class AssessmentsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      appBar: const AppTopBar(
-        title: AppStrings.assessments,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Navbar ─────────────────────────────────────────────────────
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              child: AppNavBar(),
+            ),
+
+            // ── Scrollable content ─────────────────────────────────────────
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -123,6 +132,10 @@ class AssessmentsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
+          ],
+        ),
+              ),
+            ),
           ],
         ),
       ),
