@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../config/routes/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -105,7 +106,7 @@ class _EmptyState extends StatelessWidget {
           PrimaryButton(
             label: AppStrings.startAssessment,
             trailingIcon: Icons.arrow_forward,
-            onPressed: () => context.push(RoutePaths.patientDetails),
+            onPressed: () => context.push(RoutePaths.assessmentSelection),
           ),
         ],
       ),
@@ -236,7 +237,7 @@ class _NewAssessmentButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push(RoutePaths.patientDetails),
+      onTap: () => context.push(RoutePaths.assessmentSelection),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -271,191 +272,256 @@ class _AssessmentCard extends StatelessWidget {
 
   const _AssessmentCard({required this.item});
 
+  // Derive assessment type from available data
+  String get _assessmentType {
+    if (item.woundType != null && item.woundType!.isNotEmpty) {
+      final wt = item.woundType!.toLowerCase();
+      if (wt.contains('skin') || wt.contains('rash') || wt.contains('mole')) {
+        return 'Skin Condition Assessment';
+      }
+      return 'Wound Assessment';
+    }
+    return 'Symptom Assessment';
+  }
+
+  IconData get _assessmentIcon {
+    final type = _assessmentType;
+    if (type == 'Skin Condition Assessment') return Icons.front_hand_outlined;
+    if (type == 'Wound Assessment') return Icons.healing_rounded;
+    return Icons.monitor_heart_outlined;
+  }
+
+  Color _iconBgColor(Color risk) => risk.withValues(alpha: 0.12);
+
+  Color get _riskColor {
+    return switch (item.riskLevel?.toLowerCase()) {
+      'low'      => AppColors.success,
+      'moderate' => AppColors.warning,
+      'high'     => AppColors.urgencyMedium,
+      'critical' => AppColors.error,
+      _          => AppColors.textTertiary,
+    };
+  }
+
+  Color get _riskBg {
+    return switch (item.riskLevel?.toLowerCase()) {
+      'low'      => AppColors.successLight,
+      'moderate' => AppColors.warningLight,
+      'high'     => const Color(0xFFFFEDD5),
+      'critical' => AppColors.errorLight,
+      _          => AppColors.background,
+    };
+  }
+
+  String get _dateStr {
+    final dt = item.createdAt.toLocal();
+    const months = [
+      'Jan','Feb','Mar','Apr','May','Jun',
+      'Jul','Aug','Sep','Oct','Nov','Dec',
+    ];
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final itemDay = DateTime(dt.year, dt.month, dt.day);
+    if (itemDay == today) return 'Updated today';
+    if (itemDay == today.subtract(const Duration(days: 1))) return 'Updated yesterday';
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  static String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
+  static String _formatTitle(String raw) =>
+      raw.replaceAll('_', ' ').split(' ').map(_capitalize).join(' ');
+
   @override
   Widget build(BuildContext context) {
-    final riskColor = _riskColor(item.riskLevel);
-    final riskBg = _riskBgColor(item.riskLevel);
-    final dateStr = _formatDate(item.createdAt.toLocal());
+    final riskColor = _riskColor;
+    final riskBgColor = _riskBg;
+    final title = item.woundType != null
+        ? _formatTitle(item.woundType!)
+        : item.symptoms.isNotEmpty
+            ? _capitalize(item.symptoms.first)
+            : 'Assessment';
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.cardBorder),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: const Color(0xFFEDF0F7)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: const Color(0xFF2563EB).withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top row: date + risk badge
-            Row(
-              children: [
-                Icon(
-                  Icons.schedule_rounded,
-                  size: 14,
-                  color: AppColors.textTertiary,
-                ),
-                const SizedBox(width: 4),
-                Text(dateStr, style: AppTextStyles.caption),
-                const Spacer(),
-                if (item.riskLevel != null)
-                  _RiskBadge(
-                    label: item.riskLevel!,
-                    color: riskColor,
-                    bgColor: riskBg,
+            // ── Left: coloured icon ──────────────────────────────────────
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: _iconBgColor(riskColor),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+              child: Icon(_assessmentIcon, size: 24, color: riskColor),
+            ),
+            const SizedBox(width: AppSpacing.md),
+
+            // ── Centre: details ──────────────────────────────────────────
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Assessment type label
+                  Text(
+                    _assessmentType,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primary,
+                      letterSpacing: 0.3,
+                    ),
                   ),
-                if (item.emergency == true) ...[
-                  const SizedBox(width: AppSpacing.xs),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: 2,
+                  const SizedBox(height: 2),
+
+                  // Condition / wound title
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
                     ),
-                    decoration: BoxDecoration(
-                      color: AppColors.errorLight,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusFull),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.warning_rounded,
-                            size: 10, color: AppColors.error),
-                        const SizedBox(width: 3),
-                        Text(
-                          'Emergency',
-                          style: AppTextStyles.labelSm.copyWith(
-                            color: AppColors.error,
-                            fontSize: 9,
-                          ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+
+                  // Risk badge + score
+                  Row(
+                    children: [
+                      if (item.riskLevel != null)
+                        _RiskBadge(
+                          label: '${item.riskLevel!.toUpperCase()} RISK',
+                          color: riskColor,
+                          bgColor: riskBgColor,
+                        ),
+                      if (item.riskScore != null) ...[
+                        const SizedBox(width: AppSpacing.xs),
+                        _InfoChip(
+                          icon: Icons.speed_outlined,
+                          label: 'Score ${item.riskScore}',
                         ),
                       ],
-                    ),
+                      if (item.emergency == true) ...[
+                        const SizedBox(width: AppSpacing.xs),
+                        _InfoChip(
+                          icon: Icons.warning_rounded,
+                          label: 'Emergency',
+                          color: AppColors.error,
+                          bgColor: AppColors.errorLight,
+                        ),
+                      ],
+                    ],
                   ),
-                ],
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
 
-            // Wound type + score row
-            Row(
-              children: [
-                if (item.woundType != null)
-                  _InfoChip(
-                    icon: Icons.healing_outlined,
-                    label: _capitalize(item.woundType!),
+                  // Patient info row
+                  Row(
+                    children: [
+                      Icon(Icons.person_outline_rounded,
+                          size: 13, color: AppColors.textTertiary),
+                      const SizedBox(width: 3),
+                      Text(
+                        '${item.patientAge}y • ${_capitalize(item.patientSex)}',
+                        style: AppTextStyles.caption,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Icon(Icons.timer_outlined,
+                          size: 13, color: AppColors.textTertiary),
+                      const SizedBox(width: 3),
+                      Text(item.duration, style: AppTextStyles.caption),
+                      if (item.imageCount > 0) ...[
+                        const SizedBox(width: AppSpacing.md),
+                        Icon(Icons.image_outlined,
+                            size: 13, color: AppColors.textTertiary),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${item.imageCount} photo${item.imageCount == 1 ? '' : 's'}',
+                          style: AppTextStyles.caption,
+                        ),
+                      ],
+                    ],
                   ),
-                if (item.woundType != null)
-                  const SizedBox(width: AppSpacing.sm),
-                if (item.riskScore != null)
-                  _InfoChip(
-                    icon: Icons.speed_outlined,
-                    label: 'Score ${item.riskScore}',
-                  ),
-                const Spacer(),
-                Row(
-                  children: [
-                    Icon(Icons.image_outlined,
-                        size: 14, color: AppColors.textTertiary),
-                    const SizedBox(width: 3),
-                    Text(
-                      '${item.imageCount} photo${item.imageCount == 1 ? '' : 's'}',
-                      style: AppTextStyles.caption,
+
+                  // Symptoms
+                  if (item.symptoms.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        ...item.symptoms.take(3).map((s) => _SymptomChip(label: s)),
+                        if (item.symptoms.length > 3)
+                          _SymptomChip(
+                            label: '+${item.symptoms.length - 3} more',
+                            muted: true,
+                          ),
+                      ],
                     ),
                   ],
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
 
-            // Patient info row
-            Row(
-              children: [
-                _PatientInfoPill(
-                  icon: Icons.person_outline,
-                  label:
-                      '${item.patientAge}y \u2022 ${_capitalize(item.patientSex)}',
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _PatientInfoPill(
-                  icon: Icons.timer_outlined,
-                  label: item.duration,
-                ),
-              ],
-            ),
+                  const SizedBox(height: AppSpacing.sm),
 
-            // Symptoms
-            if (item.symptoms.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.xs,
-                runSpacing: AppSpacing.xs,
-                children: item.symptoms
-                    .take(4)
-                    .map((s) => _SymptomChip(label: s))
-                    .toList()
-                  ..addAll(
-                    item.symptoms.length > 4
-                        ? [
-                            _SymptomChip(
-                              label: '+${item.symptoms.length - 4} more',
-                              muted: true,
-                            )
-                          ]
-                        : [],
+                  // Date
+                  Row(
+                    children: [
+                      Icon(Icons.schedule_rounded,
+                          size: 12, color: AppColors.textTertiary),
+                      const SizedBox(width: 3),
+                      Text(_dateStr, style: AppTextStyles.caption),
+                    ],
                   ),
+                ],
               ),
-            ],
+            ),
+
+            // ── Right: View button ───────────────────────────────────────
+            const SizedBox(width: AppSpacing.sm),
+            Column(
+              children: [
+                GestureDetector(
+                  onTap: () => context.push(RoutePaths.assessmentSelection),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'View',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      const Icon(Icons.arrow_forward_rounded,
+                          size: 14, color: AppColors.primary),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
-
-  static Color _riskColor(String? level) {
-    return switch (level?.toLowerCase()) {
-      'low' => AppColors.success,
-      'moderate' => AppColors.warning,
-      'high' => AppColors.urgencyMedium,
-      'critical' => AppColors.error,
-      _ => AppColors.textTertiary,
-    };
-  }
-
-  static Color _riskBgColor(String? level) {
-    return switch (level?.toLowerCase()) {
-      'low' => AppColors.successLight,
-      'moderate' => AppColors.warningLight,
-      'high' => const Color(0xFFFFEDD5),
-      'critical' => AppColors.errorLight,
-      _ => AppColors.background,
-    };
-  }
-
-  static String _capitalize(String s) {
-    if (s.isEmpty) return s;
-    return s[0].toUpperCase() + s.substring(1);
-  }
-
-  static String _formatDate(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-    final minute = dt.minute.toString().padLeft(2, '0');
-    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year} \u2022 $hour:$minute $ampm';
-  }
 }
+
 
 // ── Sub-widgets ─────────────────────────────────────────────────────────────
 
@@ -506,29 +572,38 @@ class _RiskBadge extends StatelessWidget {
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color? color;
+  final Color? bgColor;
 
-  const _InfoChip({required this.icon, required this.label});
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    this.color,
+    this.bgColor,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final fg = color ?? AppColors.primary;
+    final bg = bgColor ?? AppColors.primarySurface;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primarySurface,
+        color: bg,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: AppColors.primary),
+          Icon(icon, size: 12, color: fg),
           const SizedBox(width: 4),
           Text(
             label,
             style: AppTextStyles.labelSm.copyWith(
-              color: AppColors.primary,
+              color: fg,
               fontSize: 11,
             ),
           ),
@@ -538,24 +613,7 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _PatientInfoPill extends StatelessWidget {
-  final IconData icon;
-  final String label;
 
-  const _PatientInfoPill({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: AppColors.textTertiary),
-        const SizedBox(width: 3),
-        Text(label, style: AppTextStyles.caption),
-      ],
-    );
-  }
-}
 
 class _SymptomChip extends StatelessWidget {
   final String label;

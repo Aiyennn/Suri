@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/assessment/presentation/pages/analyzing_page.dart';
+import '../../features/assessment/presentation/pages/assessment_selection_page.dart';
 import '../../features/assessment/presentation/pages/assessments_page.dart';
 import '../../features/assessment/presentation/pages/history_page.dart';
 import '../../features/assessment/presentation/pages/patient_details_page.dart';
@@ -23,6 +24,7 @@ abstract final class RoutePaths {
   static const String history = '/history';
   static const String profile = '/profile';
   static const String clinic = '/clinic';
+  static const String assessmentSelection = '/assessment/select';
   static const String patientDetails = '/assessment/patient-details';
   static const String uploadImages = '/assessment/upload-images';
   static const String analyzing = '/assessment/analyzing';
@@ -105,7 +107,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // ── Assessment flow (no bottom nav) ───────────────────────────────
+      // ── Assessment flow (no bottom nav) ─────────────────────────────────
+      GoRoute(
+        path: RoutePaths.assessmentSelection,
+        builder: (context, state) => const AssessmentSelectionPage(),
+      ),
       GoRoute(
         path: RoutePaths.patientDetails,
         builder: (context, state) => const PatientDetailsPage(),

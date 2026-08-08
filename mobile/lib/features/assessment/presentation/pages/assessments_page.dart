@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../config/routes/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -82,7 +83,7 @@ class AssessmentsPage extends StatelessWidget {
             PrimaryButton(
               label: AppStrings.startAssessment,
               trailingIcon: Icons.arrow_forward_rounded,
-              onPressed: () => context.push(RoutePaths.patientDetails),
+              onPressed: () => context.push(RoutePaths.assessmentSelection),
             ),
             const SizedBox(height: AppSpacing.lg),
 
@@ -150,79 +151,326 @@ class _HeroBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1A56DB), Color(0xFF1E40AF)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: const Color(0xFFE4E9F2), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1A56DB).withValues(alpha: 0.3),
+            color: const Color(0xFF2563EB).withValues(alpha: 0.06),
             blurRadius: 16,
-            offset: const Offset(0, 6),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
+          // ── Top section ─────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.lg,
+            ),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusFull),
-                  ),
-                  child: Text(
-                    'AI POWERED',
-                    style: AppTextStyles.labelSm.copyWith(
-                      color: Colors.white,
-                      letterSpacing: 1.2,
-                    ),
+                // ── Left: text content ────────────────────────────────
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                      // Big title
+                      Text(
+                        'Assessment',
+                        style: GoogleFonts.inter(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF0D1F3C),
+                          height: 1.15,
+                        ),
+                      ),
+
+                      // Green accent underline
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 36,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      // Description
+                      Text(
+                        'Evaluate skin condition, wound characteristics, and reported symptoms to identify potential concerns and risks.',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Wound Risk\nAssessment',
-                  style: AppTextStyles.headingLg.copyWith(
-                    color: Colors.white,
-                    height: 1.2,
-                  ),
+
+                // ── Right: bandaid illustration ───────────────────────
+                const SizedBox(width: AppSpacing.md),
+                _BandaidIllustration(),
+              ],
+            ),
+          ),
+
+          // ── Divider ──────────────────────────────────────────────────
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F2F8)),
+
+          // ── Bottom info row ──────────────────────────────────────────
+          IntrinsicHeight(
+            child: Row(
+              children: [
+                _InfoStat(
+                  iconBg: const Color(0xFFEEF2FF),
+                  icon: Icons.schedule_outlined,
+                  iconColor: const Color(0xFF6366F1),
+                  label: 'EST. TIME',
+                  value: '< 2 MIN',
+                  labelColor: const Color(0xFF6366F1),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Fast, accurate analysis in under 2 minutes.',
-                  style: AppTextStyles.bodyMd.copyWith(
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
+                const VerticalDivider(
+                    width: 1, thickness: 1, color: Color(0xFFF0F2F8)),
+                _InfoStat(
+                  iconBg: const Color(0xFFFFFBEB),
+                  icon: Icons.verified_user_outlined,
+                  iconColor: const Color(0xFFF59E0B),
+                  label: 'OUTPUT',
+                  value: 'Risk Score + Plan',
+                  labelColor: const Color(0xFFF59E0B),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Bandaid illustration ──────────────────────────────────────────────────────
+
+class _BandaidIllustration extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 110,
+      height: 110,
+      child: Stack(
+        children: [
+          // Outer light circle
           Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            width: 110,
+            height: 110,
+            decoration: const BoxDecoration(
+              color: Color(0xFFEEF2FF),
+              shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.healing_rounded,
-              size: 32,
-              color: Colors.white,
+          ),
+          // Diagonal stripe accent (bottom-right)
+          Positioned(
+            right: 2,
+            bottom: 14,
+            child: Column(
+              children: List.generate(
+                3,
+                (i) => Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Container(
+                    width: 22,
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Bandaid shape — drawn with CustomPaint
+          Center(
+            child: Transform.rotate(
+              angle: -0.6,
+              child: _BandaidShape(),
+            ),
+          ),
+          // Decorative dots top-right
+          Positioned(
+            top: 6,
+            right: 4,
+            child: Column(
+              children: List.generate(
+                2,
+                (row) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: List.generate(
+                      3,
+                      (col) => Container(
+                        width: 3,
+                        height: 3,
+                        margin: const EdgeInsets.only(right: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981)
+                              .withValues(alpha: 0.5),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BandaidShape extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 68,
+      height: 32,
+      decoration: BoxDecoration(
+        color: const Color(0xFFDBEAFE),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF6366F1), width: 1.8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Left perforated end
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              3,
+              (_) => Container(
+                width: 3,
+                height: 3,
+                margin: const EdgeInsets.symmetric(vertical: 1),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF6366F1),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+          // Center pad
+          Container(
+            width: 26,
+            height: 20,
+            decoration: BoxDecoration(
+              color: const Color(0xFFBFDBFE),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                  color: const Color(0xFF6366F1).withValues(alpha: 0.5)),
+            ),
+          ),
+          // Right perforated end
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              3,
+              (_) => Container(
+                width: 3,
+                height: 3,
+                margin: const EdgeInsets.symmetric(vertical: 1),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF6366F1),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Info stat tile ────────────────────────────────────────────────────────────
+
+class _InfoStat extends StatelessWidget {
+  final Color iconBg;
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+  final Color labelColor;
+
+  const _InfoStat({
+    required this.iconBg,
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+    required this.labelColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: iconBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 15, color: iconColor),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      color: labelColor,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0D1F3C),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

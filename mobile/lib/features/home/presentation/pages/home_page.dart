@@ -50,7 +50,7 @@ class HomePage extends ConsumerWidget {
 
                     // ── Symptom input card ───────────────────────────────
                     SymptomInputCard(
-                      onSend: (_) => context.push(RoutePaths.patientDetails),
+                      onSend: (_) => context.push(RoutePaths.assessmentSelection),
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
@@ -67,7 +67,7 @@ class HomePage extends ConsumerWidget {
                             title: 'Analyze a wound',
                             subtitle:
                                 'Get AI-powered insights\nand care recommendations',
-                            onTap: () => context.push(RoutePaths.patientDetails),
+                            onTap: () => context.push(RoutePaths.assessmentSelection),
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
@@ -81,7 +81,7 @@ class HomePage extends ConsumerWidget {
                             title: 'Check my symptoms',
                             subtitle:
                                 'Understand possible\ncauses and next steps',
-                            onTap: () => context.push(RoutePaths.patientDetails),
+                            onTap: () => context.push(RoutePaths.assessmentSelection),
                           ),
                         ),
                       ],
