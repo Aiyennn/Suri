@@ -49,6 +49,11 @@ from app.services.image_decoder import decode_image
 from app.services.image_quality import assess_image_quality
 from app.repository.wound_repository import WoundAssessmentRepository
 
+from app.services.cache_service import (
+    get_cache,
+    set_cache
+)
+
 logger = logging.getLogger(__name__)
 
 # Module-level engine instance — initialised once, reused across requests.
@@ -265,11 +270,33 @@ class WoundService:
                 offset: int,
         ) -> AssessmentListResponse:
 
+            cache_key = f"assessments:{user_id}:{limit}:{offset}"
+
+            cached = get_cache(cache_key)
+
+            if cached is not None:
+                logger.debug(
+                    "Cache HIT: assesstment user_id=%s limit=%d offset=%d",
+                    user_id,
+                    limit,
+                    offset,
+                )
+
+                return AssessmentListResponse.model_validate(cached)
+
+            logger.debug(
+                "Cache MISS: assessments user_id=%s limit=%d offset=%d",
+                user_id,
+                limit,
+                offset,
+            )
+
             assessments, total = self.repository.get_assessments_with_count(
                 user_id, limit, offset
             )
 
             summaries: list[AssessmentSummary] = []
+
             for assessment in assessments:
                 # Image count
                 image_count = len(assessment.images)
@@ -296,4 +323,15 @@ class WoundService:
                     )
                 )
 
-            return AssessmentListResponse(total=total, assessments=summaries)
+            response = AssessmentListResponse(
+                total=total, 
+                assessments=summaries
+            )
+
+            set_cache(
+                cache_key,
+                response.model_dump(mode="json"),
+                ttl=60,
+            )
+
+            return response

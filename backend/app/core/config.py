@@ -44,5 +44,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    # ── Redis ────────────────────────────────────────────────────────
+    REDIS_URL: str
 
 settings = Settings()
