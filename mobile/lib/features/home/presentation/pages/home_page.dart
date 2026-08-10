@@ -26,6 +26,7 @@ class HomePage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -37,6 +37,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -225,7 +226,7 @@ class _LoadedState extends ConsumerWidget {
           ),
 
           const SliverPadding(
-            padding: EdgeInsets.only(bottom: AppSpacing.xxl),
+            padding: EdgeInsets.only(bottom: 110),
           ),
         ],
       ),

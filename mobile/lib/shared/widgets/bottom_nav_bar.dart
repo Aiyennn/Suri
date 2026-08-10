@@ -80,14 +80,18 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     // Outer padding gives the "floating" effect — space from screen edges.
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-        child: _FloatingPill(
-          currentIndex: widget.currentIndex,
-          pillFrom: _pillFrom,
-          onTap: widget.onTap,
+    return Material(
+      color: Colors.transparent,
+      type: MaterialType.transparency,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: _FloatingPill(
+            currentIndex: widget.currentIndex,
+            pillFrom: _pillFrom,
+            onTap: widget.onTap,
+          ),
         ),
       ),
     );

@@ -28,53 +28,56 @@ class AppNavBar extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final initials = _initials(user?.fullName);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // ── Profile avatar – far left ────────────────────────────────────
-        Stack(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: AppColors.primary,
-              child: initials.isNotEmpty
-                  ? Text(
-                      initials,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.person_rounded,
-                      size: 20, color: Colors.white),
-            ),
-            // Online dot
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: AppColors.success,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5),
+    return Container(
+      padding: const EdgeInsets.only(top: 12, bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // ── Profile avatar – far left ────────────────────────────────────
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 17,
+                backgroundColor: AppColors.primary,
+                child: initials.isNotEmpty
+                    ? Text(
+                        initials,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.person_rounded,
+                        size: 17, color: Colors.white),
+              ),
+              // Online dot
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: AppColors.success,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
 
-        const Spacer(),
+          const Spacer(),
 
-        // ── Notification bell – far right ────────────────────────────────
-        _NavIconButton(icon: Icons.notifications_outlined, onTap: () {}),
-        const SizedBox(width: 4),
+          // ── Notification bell – far right ────────────────────────────────
+          _NavIconButton(icon: Icons.notifications_outlined, onTap: () {}),
+          const SizedBox(width: 4),
 
-        // ── Settings – far right ─────────────────────────────────────────
-        _NavIconButton(icon: Icons.settings_outlined, onTap: () {}),
-      ],
+          // ── Settings – far right ─────────────────────────────────────────
+          _NavIconButton(icon: Icons.settings_outlined, onTap: () {}),
+        ],
+      ),
     );
   }
 }

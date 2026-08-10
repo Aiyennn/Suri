@@ -22,6 +22,7 @@ class AssessmentsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -132,7 +133,7 @@ class AssessmentsPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: 110),
           ],
         ),
               ),
