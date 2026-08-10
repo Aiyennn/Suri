@@ -1,33 +1,76 @@
-# Suri
+# Suri — AI-Powered Medical Assessment & Health Triage
 
-## Overview
+**Suri** is an intelligent medical assessment and preliminary health triage platform designed to help users evaluate their health conditions, symptoms, and physical concerns. By combining **guided symptom questionnaires**, **OpenCV medical image quality gating**, **AI visual classification models**, and a **deterministic clinical rule engine**, Suri provides patients with rapid urgency recommendations, risk scores, and care guidance.
 
-**Suri** is a health checkup application designed to help users assess their current health condition through a series of questions. Based on the user's responses, Suri evaluates potential health concerns and provides a recommendation on how urgent the situation may be.
+The mission of Suri is to make early health checkups accessible to everyone, helping users understand the severity of their symptoms and encouraging timely professional medical care.
 
-The goal of Suri is to encourage users to seek appropriate medical attention early by offering an accessible preliminary assessment.
+> [!IMPORTANT]
+> **Medical Disclaimer**: Suri is **not a replacement for a professional checkup or medical evaluation**. Instead, it is intended to **promote health awareness and encourage users to seek a timely checkup** with a qualified healthcare provider when appropriate.
 
-## Features
+---
 
-* 🩺 **Health Assessment**
+## 🌟 Key Features
 
-  * Answer a guided set of health-related questions to evaluate your symptoms and overall condition.
+* **Comprehensive Health Assessment**
+  * Guided questionnaires covering symptoms, duration, medical history, and patient demographics for tailored health evaluation.
 
-* 🚨 **Urgency Recommendation**
+* **Medical Image & Quality Validation**
+  * Support for uploading one or multiple medical/wound photographs.
+  * Automated pixel-level quality checks (**blur detection**, **brightness**, and **contrast**) to ensure images are suitable for AI analysis.
 
-  * Receive an estimated urgency level indicating whether your condition appears to require immediate medical attention, a prompt consultation, or routine monitoring.
+* **AI-Driven Visual Classification**
+  * Machine learning visual analysis to classify conditions, severity levels (*mild, moderate, severe*), healing stages, and physical indicators (redness, exudate, bleeding).
 
-* 🏥 **Clinic Recommendations**
+* **Urgency & Clinical Risk Assessment**
+  * Deterministic rule engine evaluating combined patient context + visual observations to calculate risk levels (*Low, Moderate, High/Critical*).
+  * Immediate emergency detection flags and clinical referral recommendations.
 
-  * View nearby or suggested clinics where you can seek professional medical care based on your assessment.
+* **Care & Clinic Recommendations**
+  * Actionable follow-up guidance and directions toward appropriate healthcare services and nearby clinics.
 
-* 📋 **Simple and User-Friendly**
+---
 
-  * An intuitive interface that makes health assessments quick and easy to complete.
+## 🏗️ Tech Stack
 
-## Disclaimer
+### **Backend**
+* **Framework**: FastAPI (Python 3.11+)
+* **Image Processing & ML**: OpenCV (`opencv-python-headless`), NumPy, Pydantic v2
+* **Database & ORM**: PostgreSQL with SQLAlchemy & Alembic migrations
+* **Caching**: Redis
+* **Authentication**: JWT authentication
 
-Suri is **not a substitute for professional medical advice, diagnosis, or treatment**. The assessments and recommendations provided are intended for informational purposes only. If you are experiencing severe symptoms or believe you have a medical emergency, seek immediate care from a qualified healthcare professional or your local emergency services.
+### **Mobile App**
+* **Framework**: Flutter (Dart SDK ^3.12.2)
+* **State Management**: Riverpod (`flutter_riverpod`)
+* **Navigation**: GoRouter
+* **Storage**: Flutter Secure Storage
 
-## Mission
+---
 
-Suri aims to make preliminary health assessments more accessible, helping users better understand the urgency of their symptoms and guiding them toward appropriate healthcare services.
+## 📂 Repository Structure
+
+```text
+Suri/
+├── backend/            # FastAPI backend service & API
+├── mobile/             # Flutter mobile application
+├── docker-compose.yml  # Local infrastructure services (Redis)
+└── README.md           # Project documentation
+```
+
+---
+
+## 🚀 Getting Started
+
+For setup and execution instructions, please refer directly to the respective component directories:
+
+* ⚙️ **Backend Service**: [backend/](./backend)
+* 📱 **Mobile Application**: [mobile/](./mobile)
+
+---
+
+## ⚠️ Medical Disclaimer
+
+> [!WARNING]
+> **Suri is NOT a replacement for a professional checkup or medical evaluation.**
+
+All health assessments, urgency recommendations, and visual classifications provided by Suri are intended strictly to **promote health awareness and encourage users to seek a timely checkup when appropriate**. They are for preliminary informational purposes only and do not constitute an official medical diagnosis. If you are experiencing severe symptoms, acute pain, heavy bleeding, or suspect a medical emergency, please contact qualified healthcare professionals or call your local emergency services immediately.
