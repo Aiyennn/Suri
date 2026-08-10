@@ -1,4 +1,4 @@
-# Suri — AI-Powered Medical Assessment & Health Triage
+# Suri — AI-Powered Medical Assessment
 
 **Suri** is an intelligent medical assessment and preliminary health triage platform designed to help users evaluate their health conditions, symptoms, and physical concerns. By combining **guided symptom questionnaires**, **OpenCV medical image quality gating**, **AI visual classification models**, and a **deterministic clinical rule engine**, Suri provides patients with rapid urgency recommendations, risk scores, and care guidance.
 
