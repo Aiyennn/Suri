@@ -47,4 +47,8 @@ class Settings(BaseSettings):
     # ── Redis ────────────────────────────────────────────────────────
     REDIS_URL: str
 
+    # ── Overpass API ─────────────────────────────────────────────────
+    OVERPASS_URL: str = "https://overpass-api.de/api/interpreter"
+    OVERPASS_TIMEOUT_SECONDS: int = 30
+
 settings = Settings()

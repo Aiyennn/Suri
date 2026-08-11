@@ -13,6 +13,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/medical_facilities/presentation/pages/nearby_facilities_page.dart';
 import '../../features/shell/presentation/pages/shell_page.dart';
 
 /// Route paths.
@@ -29,6 +30,8 @@ abstract final class RoutePaths {
   static const String uploadImages = '/assessment/upload-images';
   static const String analyzing = '/assessment/analyzing';
   static const String results = '/assessment/results';
+  // Standalone push route (from ResultsPage) — no bottom nav
+  static const String nearbyFacilities = '/nearby-facilities';
 }
 
 /// Routes that don't require authentication.
@@ -101,7 +104,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePaths.clinic,
             pageBuilder: (context, state) => const NoTransitionPage(
-              child: _PlaceholderPage(title: 'Clinic'),
+              child: NearbyFacilitiesPage(),
             ),
           ),
         ],
@@ -127,6 +130,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.results,
         builder: (context, state) => const ResultsPage(),
+      ),
+      // Nearby facilities — standalone push from ResultsPage (no bottom nav)
+      GoRoute(
+        path: RoutePaths.nearbyFacilities,
+        builder: (context, state) => const NearbyFacilitiesPage(),
       ),
     ],
   );
@@ -163,35 +171,4 @@ class RouterNotifier extends Notifier<void> implements Listenable {
   }
 }
 
-// ── Placeholder page ──────────────────────────────────────────────────────────
 
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.construction_rounded, size: 48, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text('Coming soon', style: TextStyle(color: Colors.grey[400])),
-          ],
-        ),
-      ),
-    );
-  }
-}

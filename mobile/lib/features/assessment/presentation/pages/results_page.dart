@@ -77,9 +77,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
                   ? assessment.recommendations.first 
                   : 'Please consult a healthcare professional.',
               buttonLabel: AppStrings.findNearbyClinic,
-              onButtonPressed: () {
-                // Open map or clinic finder
-              },
+              onButtonPressed: () => context.push(RoutePaths.nearbyFacilities),
             ),
             const SizedBox(height: AppSpacing.xxl),
 
