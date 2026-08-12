@@ -9,6 +9,12 @@ The mission of Suri is to make early health checkups accessible to everyone, hel
 
 ---
 
+## Application Preview
+![App Showcase](./docs/images/app_showcase.png)
+![App Overview](./docs/images/app_overview.png)
+
+---
+
 ## 🌟 Key Features
 
 * **Comprehensive Health Assessment**

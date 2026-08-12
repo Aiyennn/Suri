@@ -15,8 +15,8 @@ Suri Backend is the core backend service powering the Suri application. It provi
 
 ## Architecture
 
+```text
 Request flow:
-
 Client
   ↓
 FastAPI API
@@ -30,6 +30,7 @@ Clinical Rule Engine
 PostgreSQL
   ↓
 Redis (assessment history cache)
+```
 
 The AI model produces visual observations, while the deterministic rule
 engine handles risk scoring, referrals, recommendations, and follow-ups.
