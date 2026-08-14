@@ -19,4 +19,7 @@ abstract final class ApiConstants {
 
   // ── Medical facilities endpoints ─────────────────────────────────────
   static const String nearbyFacilities = '/medical-facilities/nearby';
+
+  // ── Chatbot endpoints ────────────────────────────────────────────────
+  static const String chatMessage = '/chatbot/message';
 }

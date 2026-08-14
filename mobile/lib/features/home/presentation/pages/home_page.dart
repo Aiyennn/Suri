@@ -21,6 +21,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final token = ref.watch(currentTokenProvider) ?? '';
     final firstName = _firstName(user?.fullName);
 
     return Scaffold(
@@ -51,6 +52,7 @@ class HomePage extends ConsumerWidget {
 
                     // ── Symptom input card ───────────────────────────────
                     SymptomInputCard(
+                      token: token,
                       onSend: (_) => context.push(RoutePaths.assessmentSelection),
                     ),
                     const SizedBox(height: AppSpacing.lg),

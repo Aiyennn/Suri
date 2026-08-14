@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.auth import router as auth_router
+from app.api.chatbot import router as chatbot_router
 from app.api.health import router as health_router
 from app.api.medical_facilities import router as medical_facilities_router
 from app.api.wound import router as wound_router
@@ -47,6 +48,7 @@ register_exception_handlers(app)
 app.include_router(health_router)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(wound_router, prefix="/wound", tags=["wound"])
+app.include_router(chatbot_router, prefix="/chatbot", tags=["chatbot"])
 app.include_router(
     medical_facilities_router,
     prefix="/medical-facilities",

@@ -51,4 +51,8 @@ class Settings(BaseSettings):
     OVERPASS_URL: str = "https://overpass-api.de/api/interpreter"
     OVERPASS_TIMEOUT_SECONDS: int = 30
 
+    # ── Gemini AI ─────────────────────────────────────────────────────
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.6-flash"
+
 settings = Settings()
