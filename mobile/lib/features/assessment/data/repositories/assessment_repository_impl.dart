@@ -1,20 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/api_constants.dart';
-
 import '../../domain/entities/assessment.dart';
 import '../../domain/entities/patient.dart';
 import '../../domain/repositories/assessment_repository.dart';
 
-/// Real implementation that sends patient data + wound images to the backend
+/// Implementation that sends patient data + wound images to the backend
 /// wound-analysis API and deserializes the returned JSON into an [Assessment].
 ///
-/// Uses [HttpClient] from `dart:io` to stream the request body and track
-/// real upload progress byte-by-byte.
+/// Uses [XFile.readAsBytes] and [http.MultipartFile.fromBytes] for universal
+/// cross-platform compatibility across Web, Android, iOS, and Desktop.
 class AssessmentRepositoryImpl implements AssessmentRepository {
   // ─── Configuration ───────────────────────────────────────────────────────
 
@@ -32,7 +31,7 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
   }) async {
     final uri = Uri.parse('${ApiConstants.baseUrl}$_woundEndpoint');
 
-    // 1. Build a multipart request to compute headers and body bytes.
+    // 1. Build a multipart request.
     final multipart = http.MultipartRequest('POST', uri);
 
     // 2. Attach structured text fields from the Patient entity.
@@ -44,104 +43,52 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
       'medical_history': patient.medicalHistory ?? '',
     });
 
-    // 3. Attach each uploaded image file.
+    // 3. Attach each uploaded image file using raw bytes for cross-platform support.
+    int totalEstimatedBytes = 0;
     for (final path in imagePaths) {
+      final xFile = XFile(path);
+      final bytes = await xFile.readAsBytes();
+      totalEstimatedBytes += bytes.length;
+
+      final fileName = xFile.name.isNotEmpty
+          ? xFile.name
+          : (path.split(RegExp(r'[/\\]')).last.isNotEmpty
+              ? path.split(RegExp(r'[/\\]')).last
+              : 'wound_image.jpg');
+
       multipart.files.add(
-        await http.MultipartFile.fromPath('images', path),
-      );
-    }
-
-    // ─── DEBUG LOGGING ─────────────────────────────────────────────────────
-
-    print('========== WOUND ANALYSIS REQUEST ==========');
-    print('URL: ${multipart.url}');
-    print('Method: ${multipart.method}');
-
-    print('Fields:');
-    multipart.fields.forEach((key, value) {
-      print('  $key: $value');
-    });
-
-    print('Files:');
-    for (final file in multipart.files) {
-      print(
-        '  field=${file.field}, '
-        'filename=${file.filename}, '
-        'length=${file.length}',
-      );
-    }
-    print('============================================');
-
-    // 4. Finalize the multipart body to obtain the raw byte stream.
-    final bodyStream = multipart.finalize();
-    final totalBytes = multipart.contentLength;
-
-    // 5. Open a raw HttpClient connection for byte-level progress tracking.
-    final httpClient = HttpClient();
-    try {
-      final request = await httpClient.openUrl('POST', uri);
-
-      // Copy headers from the multipart request.
-      request.headers.set(
-        'content-type',
-        multipart.headers['content-type'] ?? 'multipart/form-data',
-      );
-      request.headers.set('Authorization', 'Bearer $token');
-      request.contentLength = totalBytes;
-
-      // 6. Stream the body through, counting bytes for progress.
-      int bytesSent = 0;
-
-      // Report initial progress
-      onUploadProgress?.call(0, totalBytes);
-
-      await request.addStream(
-        bodyStream.transform(
-          _ProgressTransformer(
-            onProgress: (chunkSize) {
-              bytesSent += chunkSize;
-              onUploadProgress?.call(bytesSent, totalBytes);
-            },
-          ),
+        http.MultipartFile.fromBytes(
+          'images',
+          bytes,
+          filename: fileName,
         ),
       );
-
-      // 7. Close the request and read the response.
-      final response = await request.close();
-      final responseBody = await response.transform(utf8.decoder).join();
-
-      // 8. Handle non-2xx status codes.
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(
-          'Wound analysis API error ${response.statusCode}: $responseBody',
-        );
-      }
-
-      // 9. Decode the JSON response and map it to the Assessment entity.
-      final Map<String, dynamic> json =
-          jsonDecode(responseBody) as Map<String, dynamic>;
-
-      return Assessment.fromJson(json);
-    } finally {
-      httpClient.close();
     }
-  }
 
+    if (token.isNotEmpty) {
+      multipart.headers['Authorization'] = 'Bearer $token';
+    }
 
-}
+    // Report initial progress
+    onUploadProgress?.call(0, totalEstimatedBytes);
 
-/// A [StreamTransformer] that passes data through unchanged but reports
-/// the size of each chunk via [onProgress].
-class _ProgressTransformer extends StreamTransformerBase<List<int>, List<int>> {
-  final void Function(int chunkSize) onProgress;
+    // 4. Send request
+    final streamedResponse = await multipart.send();
+    onUploadProgress?.call(totalEstimatedBytes, totalEstimatedBytes);
 
-  const _ProgressTransformer({required this.onProgress});
+    final response = await http.Response.fromStream(streamedResponse);
 
-  @override
-  Stream<List<int>> bind(Stream<List<int>> stream) {
-    return stream.map((chunk) {
-      onProgress(chunk.length);
-      return chunk;
-    });
+    // 5. Handle non-2xx status codes.
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception(
+        'Wound analysis API error ${response.statusCode}: ${response.body}',
+      );
+    }
+
+    // 6. Decode the JSON response and map it to the Assessment entity.
+    final Map<String, dynamic> json =
+        jsonDecode(response.body) as Map<String, dynamic>;
+
+    return Assessment.fromJson(json);
   }
 }

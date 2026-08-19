@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../data/repositories/assessment_repository_impl.dart';
 import '../../domain/entities/assessment.dart';
+import '../../domain/entities/assessment_history.dart';
 import '../../domain/entities/patient.dart';
 import '../../domain/repositories/assessment_repository.dart';
 import '../../domain/usecases/run_assessment.dart';
@@ -175,6 +176,73 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
     state = state.copyWith(
       uploadedImagePaths: [],
       categoryImageCounts: {},
+    );
+  }
+
+  /// Load a historic assessment result into state to view its details.
+  void setHistoryResult(AssessmentHistoryItem item) {
+    final riskLevel = item.riskLevel ?? 'Moderate';
+    final isEmergency = item.emergency ?? false;
+    final isReferral =
+        riskLevel.toLowerCase() == 'high' || riskLevel.toLowerCase() == 'critical' || isEmergency;
+
+    final followUp = isEmergency
+        ? 'Immediate Emergency Evaluation'
+        : (riskLevel.toLowerCase() == 'high' || riskLevel.toLowerCase() == 'critical')
+            ? 'Consult clinician within 24 hours'
+            : 'Review in 3–5 days';
+
+    final conditionName = item.woundType != null && item.woundType!.isNotEmpty
+        ? item.woundType!
+            .replaceAll('_', ' ')
+            .split(' ')
+            .map((s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1))
+            .join(' ')
+        : 'Clinical Assessment';
+
+    final recommendations = <String>[
+      if (isEmergency)
+        'Seek immediate emergency medical attention.'
+      else if (riskLevel.toLowerCase() == 'high' || riskLevel.toLowerCase() == 'critical')
+        'Schedule an urgent consultation with a qualified medical specialist.'
+      else
+        'Maintain clean dressing and monitor for any signs of worsening infection or inflammation.',
+      if (item.symptoms.isNotEmpty)
+        'Monitored symptoms: ${item.symptoms.join(', ')}.',
+      'Seek formal medical review if symptoms persist beyond ${item.duration}.',
+    ];
+
+    final assessment = Assessment(
+      riskScore: item.riskScore ?? 0,
+      riskLevel: riskLevel,
+      recommendations: recommendations,
+      referralRequired: isReferral,
+      emergency: isEmergency,
+      followUp: followUp,
+      triggeredRules: [
+        TriggeredRule(
+          id: item.id,
+          name: conditionName,
+          reason:
+              'Recorded duration: ${item.duration}. Symptoms: ${item.symptoms.join(', ')}.',
+          scoreContribution: item.riskScore ?? 0,
+        ),
+      ],
+      disclaimer:
+          'All health assessments and recommendations are for preliminary informational purposes only.',
+    );
+
+    state = state.copyWith(
+      result: assessment,
+      patient: state.patient.copyWith(
+        age: int.tryParse(item.patientAge),
+        sex: item.patientSex,
+        symptoms: item.symptoms,
+        duration: item.duration,
+      ),
+      isAnalyzing: false,
+      isUploading: false,
+      error: null,
     );
   }
 

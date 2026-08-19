@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -60,6 +61,25 @@ class ImagePreviewTile extends StatelessWidget {
   }
 
   Widget _buildImage() {
+    if (kIsWeb ||
+        imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://') ||
+        imagePath.startsWith('blob:')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        width: 72,
+        height: 72,
+        errorBuilder: (_, __, ___) => Container(
+          color: AppColors.primaryLight,
+          child: const Icon(
+            Icons.broken_image_outlined,
+            color: AppColors.primary,
+            size: 28,
+          ),
+        ),
+      );
+    }
     // Check if the path is a file path
     final file = File(imagePath);
     if (file.existsSync()) {
@@ -68,6 +88,14 @@ class ImagePreviewTile extends StatelessWidget {
         fit: BoxFit.cover,
         width: 72,
         height: 72,
+        errorBuilder: (_, __, ___) => Container(
+          color: AppColors.primaryLight,
+          child: const Icon(
+            Icons.broken_image_outlined,
+            color: AppColors.primary,
+            size: 28,
+          ),
+        ),
       );
     }
     // Placeholder for mock images

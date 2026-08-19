@@ -39,7 +39,8 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
           title: AppStrings.appName,
           stepText: AppStrings.assessmentReady,
           showBack: true,
-          onBack: () => context.go(RoutePaths.home),
+          onBack: () =>
+              context.canPop() ? context.pop() : context.go(RoutePaths.home),
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -55,7 +56,8 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
         title: AppStrings.appName,
         stepText: AppStrings.assessmentReady,
         showBack: true,
-        onBack: () => context.go(RoutePaths.home),
+        onBack: () =>
+            context.canPop() ? context.pop() : context.go(RoutePaths.home),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
