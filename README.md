@@ -15,7 +15,7 @@ The mission of Suri is to make early health checkups accessible to everyone, hel
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 * **Comprehensive Health Assessment**
   * Guided questionnaires covering symptoms, duration, medical history, and patient demographics for tailored health evaluation.
@@ -36,7 +36,7 @@ The mission of Suri is to make early health checkups accessible to everyone, hel
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 ### **Backend**
 * **Framework**: FastAPI (Python 3.11+)
@@ -53,7 +53,7 @@ The mission of Suri is to make early health checkups accessible to everyone, hel
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```text
 Suri/
@@ -65,16 +65,28 @@ Suri/
 
 ---
 
-## 🚀 Getting Started
+## Implementation Status & Pending Features
 
-For setup and execution instructions, please refer directly to the respective component directories:
+> [!NOTE]
+> The wound classification model in [`backend/app/ai/model.py`](./backend/app/ai/model.py) is currently a mock stub returning placeholder predictions to allow testing the API and mobile app.
 
-* ⚙️ **Backend Service**: [backend/](./backend)
-* 📱 **Mobile Application**: [mobile/](./mobile)
+### To Be Implemented
+* **ML Assessment Model**: Replace the mock stub with a trained vision model to classify wound types, assess severity, and detect visual signs (redness, bleeding, exudate).
+* **Wound Segmentation**: Add boundary detection and area estimation.
+* **Healing Tracking**: Track wound progress and changes across multiple checkups over time.
 
 ---
 
-## ⚠️ Medical Disclaimer
+## Getting Started
+
+For setup and execution instructions, please refer directly to the respective component directories:
+
+* **Backend Service**: [backend/](./backend)
+* **Mobile Application**: [mobile/](./mobile)
+
+---
+
+## Medical Disclaimer
 
 > [!WARNING]
 > **Suri is NOT a replacement for a professional checkup or medical evaluation.**
