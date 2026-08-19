@@ -13,27 +13,45 @@ final assessmentsHistoryRepositoryProvider =
 
 // ── State ─────────────────────────────────────────────────────────────────
 
-sealed class AssessmentsHistoryState {
-  const AssessmentsHistoryState();
-}
-
-class AssessmentsHistoryInitial extends AssessmentsHistoryState {
-  const AssessmentsHistoryInitial();
-}
-
-class AssessmentsHistoryLoading extends AssessmentsHistoryState {
-  const AssessmentsHistoryLoading();
-}
-
-class AssessmentsHistoryLoaded extends AssessmentsHistoryState {
+class AssessmentsHistoryState {
   final List<AssessmentHistoryItem> items;
   final int total;
-  const AssessmentsHistoryLoaded({required this.items, required this.total});
-}
+  final bool isLoading;
+  final bool isRevalidating;
+  final String? error;
+  final bool hasLoadedOnce;
 
-class AssessmentsHistoryError extends AssessmentsHistoryState {
-  final String message;
-  const AssessmentsHistoryError(this.message);
+  const AssessmentsHistoryState({
+    this.items = const [],
+    this.total = 0,
+    this.isLoading = false,
+    this.isRevalidating = false,
+    this.error,
+    this.hasLoadedOnce = false,
+  });
+
+  bool get isEmpty => hasLoadedOnce && items.isEmpty;
+  bool get hasData => items.isNotEmpty;
+  bool get hasError => error != null && items.isEmpty;
+
+  AssessmentsHistoryState copyWith({
+    List<AssessmentHistoryItem>? items,
+    int? total,
+    bool? isLoading,
+    bool? isRevalidating,
+    String? error,
+    bool? hasLoadedOnce,
+    bool clearError = false,
+  }) {
+    return AssessmentsHistoryState(
+      items: items ?? this.items,
+      total: total ?? this.total,
+      isLoading: isLoading ?? this.isLoading,
+      isRevalidating: isRevalidating ?? this.isRevalidating,
+      error: clearError ? null : (error ?? this.error),
+      hasLoadedOnce: hasLoadedOnce ?? this.hasLoadedOnce,
+    );
+  }
 }
 
 // ── Notifier ─────────────────────────────────────────────────────────────
@@ -47,23 +65,83 @@ class AssessmentsHistoryNotifier
   final Ref _ref;
 
   AssessmentsHistoryNotifier(this._repo, this._ref)
-      : super(const AssessmentsHistoryInitial());
+      : super(const AssessmentsHistoryState());
 
-  Future<void> load() async {
-    state = const AssessmentsHistoryLoading();
+  /// Stale-while-revalidate load:
+  /// - If data is already cached, keeps existing data visible and revalidates in the background.
+  /// - Only shows full loading indicator on the very first fetch when no cache exists.
+  /// - Only updates state/re-renders if incoming data differs from existing data.
+  Future<void> load({bool isManualRefresh = false}) async {
+    final hasExistingData = state.hasData || state.hasLoadedOnce;
+
+    if (!hasExistingData) {
+      state = state.copyWith(isLoading: true, clearError: true);
+    } else {
+      state = state.copyWith(isRevalidating: true);
+    }
+
     try {
       final token = _ref.read(currentTokenProvider) ?? '';
       final result = await _repo.fetchAssessments(token: token);
-      state = AssessmentsHistoryLoaded(
-        items: result.assessments,
-        total: result.total,
-      );
+
+      final newItems = result.assessments;
+      final newTotal = result.total;
+
+      final bool hasChanged = _hasDataChanged(state.items, newItems, state.total, newTotal);
+
+      if (hasChanged || !state.hasLoadedOnce) {
+        state = state.copyWith(
+          items: newItems,
+          total: newTotal,
+          isLoading: false,
+          isRevalidating: false,
+          hasLoadedOnce: true,
+          clearError: true,
+        );
+      } else {
+        // Data is identical: quietly stop revalidating without replacing items list
+        state = state.copyWith(
+          isLoading: false,
+          isRevalidating: false,
+          hasLoadedOnce: true,
+        );
+      }
     } catch (e) {
-      state = AssessmentsHistoryError(e.toString());
+      // If cached data exists, preserve it gracefully during background errors
+      if (hasExistingData) {
+        state = state.copyWith(
+          isLoading: false,
+          isRevalidating: false,
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          isRevalidating: false,
+          error: e.toString(),
+          hasLoadedOnce: true,
+        );
+      }
     }
   }
 
-  Future<void> refresh() => load();
+  Future<void> refresh() => load(isManualRefresh: true);
+
+  bool _hasDataChanged(
+    List<AssessmentHistoryItem> current,
+    List<AssessmentHistoryItem> incoming,
+    int currentTotal,
+    int incomingTotal,
+  ) {
+    if (current.length != incoming.length || currentTotal != incomingTotal) {
+      return true;
+    }
+    for (int i = 0; i < current.length; i++) {
+      if (current[i] != incoming[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 // ── Provider ─────────────────────────────────────────────────────────────

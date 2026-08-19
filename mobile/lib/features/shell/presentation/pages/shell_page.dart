@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/routes/app_router.dart';
 import '../../../../shared/widgets/bottom_nav_bar.dart';
+import 'package:mobile/features/assessment/presentation/providers/assessments_history_provider.dart';
 
 /// Shell page that wraps tab content with the BottomNavBar.
-class ShellPage extends StatelessWidget {
+class ShellPage extends ConsumerWidget {
   final Widget child;
 
   const ShellPage({super.key, required this.child});
@@ -18,7 +20,11 @@ class ShellPage extends StatelessWidget {
     return 0;
   }
 
-  void _onTap(BuildContext context, int index) {
+  void _onTap(BuildContext context, WidgetRef ref, int index) {
+    if (index == 0 || index == 2) {
+      // Quietly refresh history when navigating to Home or History tabs
+      ref.read(assessmentsHistoryProvider.notifier).load();
+    }
     switch (index) {
       case 0:
         context.go(RoutePaths.home);
@@ -32,14 +38,14 @@ class ShellPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBody: true,
       body: child,
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex(context),
-        onTap: (index) => _onTap(context, index),
+        onTap: (index) => _onTap(context, ref, index),
       ),
     );
   }

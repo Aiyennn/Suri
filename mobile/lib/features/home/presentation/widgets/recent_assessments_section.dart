@@ -71,16 +71,16 @@ class _RecentAssessmentsSectionState
         const SizedBox(height: AppSpacing.lg),
 
         // ── Content ────────────────────────────────────────────────────
-        switch (state) {
-          AssessmentsHistoryLoading() => const _LoadingState(),
-          AssessmentsHistoryLoaded(items: final items) when items.isEmpty =>
-            const _EmptyState(),
-          AssessmentsHistoryLoaded(items: final items) =>
-            _AssessmentList(items: items.take(3).toList()),
-          AssessmentsHistoryError(message: final msg) =>
-            _ErrorState(message: msg),
-          _ => const SizedBox.shrink(),
-        },
+        if (state.isLoading && !state.hasData)
+          const _LoadingState()
+        else if (state.hasError && !state.hasData)
+          _ErrorState(message: state.error ?? 'Unable to load assessments')
+        else if (state.isEmpty)
+          const _EmptyState()
+        else if (state.hasData)
+          _AssessmentList(items: state.items.take(3).toList())
+        else
+          const SizedBox.shrink(),
       ],
     );
   }

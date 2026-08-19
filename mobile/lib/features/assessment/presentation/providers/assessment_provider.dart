@@ -7,6 +7,7 @@ import '../../domain/entities/assessment_history.dart';
 import '../../domain/entities/patient.dart';
 import '../../domain/repositories/assessment_repository.dart';
 import '../../domain/usecases/run_assessment.dart';
+import 'assessments_history_provider.dart';
 
 /// The current step in the analysis process (0-5).
 enum AnalysisStep {
@@ -334,6 +335,9 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
         isUploading: false,
         uploadProgress: 1.0,
       );
+
+      // Trigger a quiet revalidation of the history list
+      _ref.read(assessmentsHistoryProvider.notifier).load();
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(

@@ -42,6 +42,37 @@ class AssessmentHistoryItem {
       imageCount: json['image_count'] as int? ?? 0,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AssessmentHistoryItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          createdAt == other.createdAt &&
+          patientAge == other.patientAge &&
+          patientSex == other.patientSex &&
+          duration == other.duration &&
+          riskLevel == other.riskLevel &&
+          riskScore == other.riskScore &&
+          woundType == other.woundType &&
+          emergency == other.emergency &&
+          imageCount == other.imageCount &&
+          symptoms.length == other.symptoms.length;
+
+  @override
+  int get hashCode => Object.hash(
+        id,
+        createdAt,
+        patientAge,
+        patientSex,
+        duration,
+        riskLevel,
+        riskScore,
+        woundType,
+        emergency,
+        imageCount,
+      );
 }
 
 class AssessmentHistoryResponse {

@@ -54,19 +54,25 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   }
 
   Widget _buildBody(AssessmentsHistoryState state) {
-    return switch (state) {
-      AssessmentsHistoryInitial() => const SizedBox.shrink(),
-      AssessmentsHistoryLoading() => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      AssessmentsHistoryError(:final message) => _ErrorState(
-          message: message,
-          onRetry: () =>
-              ref.read(assessmentsHistoryProvider.notifier).refresh(),
-        ),
-      AssessmentsHistoryLoaded(:final items, :final total) =>
-        items.isEmpty ? _EmptyState() : _LoadedState(items: items, total: total),
-    };
+    if (state.isLoading && !state.hasData) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (state.hasError && !state.hasData) {
+      return _ErrorState(
+        message: state.error ?? 'Unable to load assessments',
+        onRetry: () =>
+            ref.read(assessmentsHistoryProvider.notifier).load(),
+      );
+    }
+
+    if (state.isEmpty && !state.hasData) {
+      return _EmptyState();
+    }
+
+    return _LoadedState(items: state.items, total: state.total);
   }
 }
 
