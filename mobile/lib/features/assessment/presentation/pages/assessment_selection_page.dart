@@ -102,7 +102,8 @@ class AssessmentSelectionPage extends StatelessWidget {
                       subtitle: 'Check for rashes, moles,\nor skin changes.',
                       titleColor: AppColors.primary,
                       accentColor: const Color(0xFF3B82F6),
-                      onTap: () => context.push(RoutePaths.patientDetails),
+                      isEnabled: false,
+                      onTap: null,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     _AssessmentCard(
@@ -111,6 +112,7 @@ class AssessmentSelectionPage extends StatelessWidget {
                       subtitle: 'Track healing progress or\nevaluate a new injury.',
                       titleColor: const Color(0xFF16A34A),
                       accentColor: const Color(0xFF16A34A),
+                      isEnabled: true,
                       onTap: () => context.push(RoutePaths.patientDetails),
                     ),
                     const SizedBox(height: AppSpacing.md),
@@ -120,7 +122,8 @@ class AssessmentSelectionPage extends StatelessWidget {
                       subtitle: 'Analyze general symptoms\nlike fever, pain, or cough.',
                       titleColor: const Color(0xFF7C3AED),
                       accentColor: const Color(0xFF7C3AED),
-                      onTap: () => context.push(RoutePaths.patientDetails),
+                      isEnabled: false,
+                      onTap: null,
                     ),
                     const SizedBox(height: AppSpacing.xxl),
                   ],
@@ -142,7 +145,8 @@ class _AssessmentCard extends StatefulWidget {
   final String subtitle;
   final Color titleColor;
   final Color accentColor;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool isEnabled;
 
   const _AssessmentCard({
     required this.icon,
@@ -150,7 +154,8 @@ class _AssessmentCard extends StatefulWidget {
     required this.subtitle,
     required this.titleColor,
     required this.accentColor,
-    required this.onTap,
+    this.onTap,
+    this.isEnabled = true,
   });
 
   @override
@@ -162,6 +167,102 @@ class _AssessmentCardState extends State<_AssessmentCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.isEnabled) {
+      return Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          border: Border.all(color: const Color(0xFF334155)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Dark / dimmed icon container
+            Opacity(
+              opacity: 0.4,
+              child: widget.icon,
+            ),
+            const SizedBox(width: AppSpacing.lg),
+
+            // Title + subtitle + badge
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.title,
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF94A3B8),
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF334155),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusFull),
+                        ),
+                        child: Text(
+                          'Coming Soon',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF64748B),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Disabled lock icon
+            const SizedBox(width: AppSpacing.sm),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+              ),
+              child: const Icon(
+                Icons.lock_outline_rounded,
+                size: 16,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: widget.onTap,
       onTapDown: (_) => setState(() => _pressed = true),
