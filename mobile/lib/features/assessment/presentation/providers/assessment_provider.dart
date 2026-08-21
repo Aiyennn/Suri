@@ -337,7 +337,7 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
       );
 
       // Trigger a quiet revalidation of the history list
-      _ref.read(assessmentsHistoryProvider.notifier).load();
+      _ref.read(assessmentsHistoryProvider.notifier).load(forceRefresh: true);
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(

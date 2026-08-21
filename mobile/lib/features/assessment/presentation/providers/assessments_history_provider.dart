@@ -71,7 +71,11 @@ class AssessmentsHistoryNotifier
   /// - If data is already cached, keeps existing data visible and revalidates in the background.
   /// - Only shows full loading indicator on the very first fetch when no cache exists.
   /// - Only updates state/re-renders if incoming data differs from existing data.
-  Future<void> load({bool isManualRefresh = false}) async {
+  Future<void> load({bool forceRefresh = false}) async {
+    if (state.hasLoadedOnce && !forceRefresh) {
+      return;
+    }
+
     final hasExistingData = state.hasData || state.hasLoadedOnce;
 
     if (!hasExistingData) {
@@ -124,7 +128,7 @@ class AssessmentsHistoryNotifier
     }
   }
 
-  Future<void> refresh() => load(isManualRefresh: true);
+  Future<void> refresh() => load(forceRefresh: true);
 
   bool _hasDataChanged(
     List<AssessmentHistoryItem> current,

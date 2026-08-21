@@ -270,27 +270,6 @@ class WoundService:
                 offset: int,
         ) -> AssessmentListResponse:
 
-            cache_key = f"assessments:{user_id}:{limit}:{offset}"
-
-            cached = get_cache(cache_key)
-
-            if cached is not None:
-                logger.debug(
-                    "Cache HIT: assesstment user_id=%s limit=%d offset=%d",
-                    user_id,
-                    limit,
-                    offset,
-                )
-
-                return AssessmentListResponse.model_validate(cached)
-
-            logger.debug(
-                "Cache MISS: assessments user_id=%s limit=%d offset=%d",
-                user_id,
-                limit,
-                offset,
-            )
-
             assessments, total = self.repository.get_assessments_with_count(
                 user_id, limit, offset
             )
@@ -326,12 +305,6 @@ class WoundService:
             response = AssessmentListResponse(
                 total=total, 
                 assessments=summaries
-            )
-
-            set_cache(
-                cache_key,
-                response.model_dump(mode="json"),
-                ttl=60,
             )
 
             return response
