@@ -41,7 +41,7 @@ class Assessment {
     required this.referralRequired,
     required this.emergency,
     required this.followUp,
-    required this.monitoringSigns,
+    this.monitoringSigns = const [],
     required this.triggeredRules,
     required this.disclaimer,
   });
@@ -51,18 +51,21 @@ class Assessment {
     if (resultsList.isEmpty) {
       throw Exception('Assessment response contains no results');
     }
-    
+
     final result = resultsList.first as Map<String, dynamic>;
 
     return Assessment(
       riskScore: result['risk_score'] as int,
       riskLevel: result['risk_level'] as String,
-      recommendations: (result['recommendations'] as List<dynamic>?)?.cast<String>() ?? [],
+      recommendations:
+          (result['recommendations'] as List<dynamic>?)?.cast<String>() ?? [],
       referralRequired: result['referral_required'] as bool? ?? false,
       emergency: result['emergency'] as bool? ?? false,
       followUp: result['follow_up'] as String? ?? '',
-      monitoringSigns: (result['monitoring_signs'] as List<dynamic>?)?.cast<String>() ?? [],
-      triggeredRules: (result['triggered_rules'] as List<dynamic>?)
+      monitoringSigns:
+          (result['monitoring_signs'] as List<dynamic>?)?.cast<String>() ?? [],
+      triggeredRules:
+          (result['triggered_rules'] as List<dynamic>?)
               ?.map((r) => TriggeredRule.fromJson(r as Map<String, dynamic>))
               .toList() ??
           [],
