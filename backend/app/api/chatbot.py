@@ -12,6 +12,7 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.dependencies import get_redis
 from app.models.user import User
 from app.schemas.chatbot import ChatMessageRequest, ChatMessageResponse
 from app.services.auth_service import get_current_user
@@ -35,6 +36,7 @@ router = APIRouter()
 async def send_message(
     req: ChatMessageRequest,
     current_user: User = Depends(get_current_user),
+    redis_client=Depends(get_redis),
 ) -> ChatMessageResponse:
     """
     Process a single chatbot turn.
@@ -48,7 +50,7 @@ async def send_message(
     Raises:
         HTTPException(503): Gemini API key not configured or Gemini is unreachable.
     """
-    service = ChatbotService()
+    service = ChatbotService(redis_client)
     try:
         intent, reply, session_id = await service.process_message(
             user_id=current_user.id,

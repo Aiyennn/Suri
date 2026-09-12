@@ -21,16 +21,15 @@ Intents
 * ``general_conversation`` — off-topic / casual — normal reply, no assessment CTA
 """
 
+import asyncio
 import json
 import logging
 import uuid
 from typing import Literal
-import asyncio
 
 import httpx
 
 from app.core.config import settings
-from app.core.redis import redis_client
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +100,9 @@ class ChatbotService:
     and persist the conversation to Redis for multi-turn context.
     """
 
+    def __init__(self, redis_client) -> None:
+        self.redis_client = redis_client
+
     async def process_message(
         self,
         user_id: int,
@@ -135,7 +137,12 @@ class ChatbotService:
         intent, reply = await self._call_gemini(history)
 
         # 5. Append model response to history
-        history.append({"role": "model", "parts": [{"text": json.dumps({"intent": intent, "reply": reply})}]})
+        history.append(
+            {
+                "role": "model",
+                "parts": [{"text": json.dumps({"intent": intent, "reply": reply})}],
+            }
+        )
 
         # 6. Persist updated history
         await self._save_history(redis_key, history)
@@ -149,7 +156,16 @@ class ChatbotService:
 
     async def _call_gemini(
         self, history: list[dict]
-    ) -> tuple[Literal["wound_assessment", "skin_assessment", "symptom_assessment", "needs_clarification", "general_conversation"], str]:
+    ) -> tuple[
+        Literal[
+            "wound_assessment",
+            "skin_assessment",
+            "symptom_assessment",
+            "needs_clarification",
+            "general_conversation",
+        ],
+        str,
+    ]:
         """Send history to Gemini and parse the structured JSON response."""
         url = _GEMINI_API_URL.format(
             model=settings.GEMINI_MODEL,
@@ -157,9 +173,7 @@ class ChatbotService:
         )
 
         payload = {
-            "system_instruction": {
-                "parts": [{"text": _SYSTEM_PROMPT}]
-            },
+            "system_instruction": {"parts": [{"text": _SYSTEM_PROMPT}]},
             "contents": history,
             "generationConfig": {
                 "temperature": 0.2,
@@ -175,30 +189,34 @@ class ChatbotService:
         data = response.json()
 
         try:
-            raw_text: str = (
-                data["candidates"][0]["content"]["parts"][0]["text"]
-            )
+            raw_text: str = data["candidates"][0]["content"]["parts"][0]["text"]
             parsed = json.loads(raw_text)
             intent: str = parsed.get("intent", "general_conversation")
             reply: str = parsed.get("reply", "")
 
             # Guard against unexpected intents
             if intent not in _VALID_INTENTS:
-                logger.warning("Unexpected Gemini intent %r — falling back to general_conversation", intent)
+                logger.warning(
+                    "Unexpected Gemini intent %r — falling back to general_conversation",
+                    intent,
+                )
                 intent = "general_conversation"
 
             return intent, reply  # type: ignore[return-value]
 
         except (KeyError, IndexError, json.JSONDecodeError) as exc:
             logger.exception("Failed to parse Gemini response: %s", exc)
-            return "general_conversation", "I'm sorry, I couldn't process that. Could you try rephrasing?"
+            return (
+                "general_conversation",
+                "I'm sorry, I couldn't process that. Could you try rephrasing?",
+            )
 
     # ── Redis helpers ─────────────────────────────────────────────────────────
 
     async def _load_history(self, redis_key: str) -> list[dict]:
         """Load conversation history from Redis, or return an empty list."""
         try:
-            raw = await asyncio.to_thread(redis_client.get, redis_key)
+            raw = await asyncio.to_thread(self.redis_client.get, redis_key)
             if raw:
                 return json.loads(raw)
         except Exception as exc:
@@ -212,7 +230,10 @@ class ChatbotService:
             history = history[-20:]
         try:
             await asyncio.to_thread(
-                redis_client.set, redis_key, json.dumps(history), ex=_HISTORY_TTL  # type: ignore[arg-type]
+                self.redis_client.set,
+                redis_key,
+                json.dumps(history),
+                ex=_HISTORY_TTL,
             )
         except Exception as exc:
             logger.warning("Could not save chat history to Redis: %s", exc)

@@ -1,38 +1,24 @@
-"""
-core/database.py
-================
-SQLAlchemy engine, session factory, and declarative base.
+"""Database factories and the application's declarative base."""
 
-Usage
------
-Import ``Base`` when defining ORM models::
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-    from core.database import Base
+from app.core.config import Settings
 
-Import ``SessionLocal`` (or use the ``get_db`` dependency) to obtain a
-database session in request handlers::
 
-    from core.database import SessionLocal
-"""
+def create_database_engine(settings: Settings) -> Engine:
+    """Build the SQLAlchemy engine used for one application instance."""
+    return create_engine(
+        settings.DATABASE_URL,
+        pool_pre_ping=True,
+        echo=settings.DEBUG,
+    )
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
 
-from app.core.config import settings
+def create_session_factory(engine: Engine) -> sessionmaker[Session]:
+    """Build sessions with the project's existing transaction defaults."""
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# ── Engine ────────────────────────────────────────────────────────────────
-engine = create_engine(
-    settings.DATABASE_URL,
-    pool_pre_ping=True,
-    echo=settings.DEBUG,
-)
 
-# ── Session factory ───────────────────────────────────────────────────────
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
-)
-
-# ── Declarative base ─────────────────────────────────────────────────────
+# Imported by models and Alembic; metadata itself has no infrastructure side effect.
 Base = declarative_base()

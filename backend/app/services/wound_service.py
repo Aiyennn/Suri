@@ -49,10 +49,6 @@ from app.schemas.wound import (
 from app.services.image_decoder import decode_image
 from app.services.image_quality import assess_image_quality
 from app.repository.wound_repository import WoundAssessmentRepository
-from app.services.cache_service import (
-    get_cache,
-    set_cache
-)
 from app.services.assessment_explanation_service import AssessmentExplanationService
 
 logger = logging.getLogger(__name__)
