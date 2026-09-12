@@ -5,7 +5,7 @@ abstract final class ApiConstants {
   /// Use:
   ///   'http://localhost:8000'    → Windows / macOS / Linux desktop
   ///   'http://10.0.2.2:8000'    → Android emulator
-  ///   'http://<your-LAN-IP>:8000' → Physical device on the same network
+  ///   `http://<your-LAN-IP>:8000` → Physical device on the same network
   static const String baseUrl = 'http://localhost:8000';
 
   // ── Auth endpoints ────────────────────────────────────────────────────

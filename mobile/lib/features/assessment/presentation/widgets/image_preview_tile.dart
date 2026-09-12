@@ -10,11 +10,7 @@ class ImagePreviewTile extends StatelessWidget {
   final String imagePath;
   final VoidCallback? onRemove;
 
-  const ImagePreviewTile({
-    super.key,
-    required this.imagePath,
-    this.onRemove,
-  });
+  const ImagePreviewTile({super.key, required this.imagePath, this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +44,7 @@ class ImagePreviewTile extends StatelessWidget {
                   color: AppColors.error,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.close,
-                  size: 12,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.close, size: 12, color: Colors.white),
               ),
             ),
           ),
@@ -70,7 +62,7 @@ class ImagePreviewTile extends StatelessWidget {
         fit: BoxFit.cover,
         width: 72,
         height: 72,
-        errorBuilder: (_, __, ___) => Container(
+        errorBuilder: (_, _, _) => Container(
           color: AppColors.primaryLight,
           child: const Icon(
             Icons.broken_image_outlined,
@@ -88,7 +80,7 @@ class ImagePreviewTile extends StatelessWidget {
         fit: BoxFit.cover,
         width: 72,
         height: 72,
-        errorBuilder: (_, __, ___) => Container(
+        errorBuilder: (_, _, _) => Container(
           color: AppColors.primaryLight,
           child: const Icon(
             Icons.broken_image_outlined,
@@ -142,10 +134,7 @@ class AddImageTile extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               'Add',
-              style: TextStyle(
-                fontSize: 10,
-                color: AppColors.textTertiary,
-              ),
+              style: TextStyle(fontSize: 10, color: AppColors.textTertiary),
             ),
           ],
         ),

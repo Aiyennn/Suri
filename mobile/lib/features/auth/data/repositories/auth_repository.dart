@@ -32,15 +32,14 @@ class AuthRepository {
   final http.Client _client;
   final FlutterSecureStorage _storage;
 
-  AuthRepository({
-    http.Client? client,
-    FlutterSecureStorage? storage,
-  })  : _client = client ?? http.Client(),
-        _storage = storage ??
-            const FlutterSecureStorage(
-              // Windows uses the Credential Manager (Windows Data Protection API).
-              wOptions: WindowsOptions(),
-            );
+  AuthRepository({http.Client? client, FlutterSecureStorage? storage})
+    : _client = client ?? http.Client(),
+      _storage =
+          storage ??
+          const FlutterSecureStorage(
+            // Windows uses the Credential Manager (Windows Data Protection API).
+            wOptions: WindowsOptions(),
+          );
 
   // ── Public API ────────────────────────────────────────────────────────────
 
@@ -59,9 +58,9 @@ class AuthRepository {
       'email': email,
       'password': password,
       'full_name': fullName,
-      if (sex case final s?) 'sex': s,
-      if (dateOfBirth case final d?) 'date_of_birth': d,
-      if (medicalHistory case final m?) 'medical_history': m,
+      'sex': ?sex,
+      'date_of_birth': ?dateOfBirth,
+      'medical_history': ?medicalHistory,
     };
 
     final response = await _client.post(
@@ -123,12 +122,8 @@ class AuthRepository {
         jsonDecode(response.body) as Map<String, dynamic>;
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final token = AuthToken.fromJson(
-        json['token'] as Map<String, dynamic>,
-      );
-      final user = UserModel.fromJson(
-        json['user'] as Map<String, dynamic>,
-      );
+      final token = AuthToken.fromJson(json['token'] as Map<String, dynamic>);
+      final user = UserModel.fromJson(json['user'] as Map<String, dynamic>);
       return AuthResult(token: token, user: user);
     }
 

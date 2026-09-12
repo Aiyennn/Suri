@@ -55,16 +55,13 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
 
   Widget _buildBody(AssessmentsHistoryState state) {
     if (state.isLoading && !state.hasData) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (state.hasError && !state.hasData) {
       return _ErrorState(
         message: state.error ?? 'Unable to load assessments',
-        onRetry: () =>
-            ref.read(assessmentsHistoryProvider.notifier).load(),
+        onRetry: () => ref.read(assessmentsHistoryProvider.notifier).load(),
       );
     }
 
@@ -185,8 +182,7 @@ class _LoadedState extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return RefreshIndicator(
       color: AppColors.primary,
-      onRefresh: () =>
-          ref.read(assessmentsHistoryProvider.notifier).refresh(),
+      onRefresh: () => ref.read(assessmentsHistoryProvider.notifier).refresh(),
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -203,8 +199,10 @@ class _LoadedState extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Assessment History',
-                            style: AppTextStyles.headingLg),
+                        Text(
+                          'Assessment History',
+                          style: AppTextStyles.headingLg,
+                        ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           '$total session${total == 1 ? '' : 's'} on record',
@@ -225,15 +223,11 @@ class _LoadedState extends ConsumerWidget {
             ),
             sliver: SliverList.separated(
               itemCount: items.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppSpacing.md),
-              itemBuilder: (context, i) =>
-                  _AssessmentCard(item: items[i]),
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              itemBuilder: (context, i) => _AssessmentCard(item: items[i]),
             ),
           ),
-          const SliverPadding(
-            padding: EdgeInsets.only(bottom: 110),
-          ),
+          const SliverPadding(padding: EdgeInsets.only(bottom: 110)),
         ],
       ),
     );
@@ -261,9 +255,7 @@ class _NewAssessmentButton extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               'New',
-              style: AppTextStyles.labelMd.copyWith(
-                color: Colors.white,
-              ),
+              style: AppTextStyles.labelMd.copyWith(color: Colors.white),
             ),
           ],
         ),
@@ -303,35 +295,47 @@ class _AssessmentCard extends ConsumerWidget {
 
   Color get _riskColor {
     return switch (item.riskLevel?.toLowerCase()) {
-      'low'      => AppColors.success,
+      'low' => AppColors.success,
       'moderate' => AppColors.warning,
-      'high'     => AppColors.urgencyMedium,
+      'high' => AppColors.urgencyMedium,
       'critical' => AppColors.error,
-      _          => AppColors.textTertiary,
+      _ => AppColors.textTertiary,
     };
   }
 
   Color get _riskBg {
     return switch (item.riskLevel?.toLowerCase()) {
-      'low'      => AppColors.successLight,
+      'low' => AppColors.successLight,
       'moderate' => AppColors.warningLight,
-      'high'     => const Color(0xFFFFEDD5),
+      'high' => const Color(0xFFFFEDD5),
       'critical' => AppColors.errorLight,
-      _          => AppColors.background,
+      _ => AppColors.background,
     };
   }
 
   String get _dateStr {
     final dt = item.createdAt.toLocal();
     const months = [
-      'Jan','Feb','Mar','Apr','May','Jun',
-      'Jul','Aug','Sep','Oct','Nov','Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final itemDay = DateTime(dt.year, dt.month, dt.day);
     if (itemDay == today) return 'Updated today';
-    if (itemDay == today.subtract(const Duration(days: 1))) return 'Updated yesterday';
+    if (itemDay == today.subtract(const Duration(days: 1))) {
+      return 'Updated yesterday';
+    }
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 
@@ -353,8 +357,8 @@ class _AssessmentCard extends ConsumerWidget {
     final title = item.woundType != null
         ? _formatTitle(item.woundType!)
         : item.symptoms.isNotEmpty
-            ? _capitalize(item.symptoms.first)
-            : 'Assessment';
+        ? _capitalize(item.symptoms.first)
+        : 'Assessment';
 
     return GestureDetector(
       onTap: () => _openResult(context, ref),
@@ -438,22 +442,31 @@ class _AssessmentCard extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        Icon(Icons.person_outline_rounded,
-                            size: 13, color: AppColors.textTertiary),
+                        Icon(
+                          Icons.person_outline_rounded,
+                          size: 13,
+                          color: AppColors.textTertiary,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           '${item.patientAge}y • ${_capitalize(item.patientSex)}',
                           style: AppTextStyles.caption,
                         ),
                         const SizedBox(width: AppSpacing.md),
-                        Icon(Icons.timer_outlined,
-                            size: 13, color: AppColors.textTertiary),
+                        Icon(
+                          Icons.timer_outlined,
+                          size: 13,
+                          color: AppColors.textTertiary,
+                        ),
                         const SizedBox(width: 3),
                         Text(item.duration, style: AppTextStyles.caption),
                         if (item.imageCount > 0) ...[
                           const SizedBox(width: AppSpacing.md),
-                          Icon(Icons.image_outlined,
-                              size: 13, color: AppColors.textTertiary),
+                          Icon(
+                            Icons.image_outlined,
+                            size: 13,
+                            color: AppColors.textTertiary,
+                          ),
                           const SizedBox(width: 3),
                           Text(
                             '${item.imageCount} photo${item.imageCount == 1 ? '' : 's'}',
@@ -468,7 +481,9 @@ class _AssessmentCard extends ConsumerWidget {
                         spacing: AppSpacing.xs,
                         runSpacing: AppSpacing.xs,
                         children: [
-                          ...item.symptoms.take(3).map((s) => _SymptomChip(label: s)),
+                          ...item.symptoms
+                              .take(3)
+                              .map((s) => _SymptomChip(label: s)),
                           if (item.symptoms.length > 3)
                             _SymptomChip(
                               label: '+${item.symptoms.length - 3} more',
@@ -480,8 +495,11 @@ class _AssessmentCard extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        Icon(Icons.schedule_rounded,
-                            size: 12, color: AppColors.textTertiary),
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 12,
+                          color: AppColors.textTertiary,
+                        ),
                         const SizedBox(width: 3),
                         Text(_dateStr, style: AppTextStyles.caption),
                       ],
@@ -506,8 +524,11 @@ class _AssessmentCard extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 2),
-                        const Icon(Icons.arrow_forward_rounded,
-                            size: 14, color: AppColors.primary),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
                       ],
                     ),
                   ),
@@ -553,16 +574,10 @@ class _RiskBadge extends StatelessWidget {
           Container(
             width: 6,
             height: 6,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: AppTextStyles.labelSm.copyWith(color: color),
-          ),
+          Text(label, style: AppTextStyles.labelSm.copyWith(color: color)),
         ],
       ),
     );
@@ -602,10 +617,7 @@ class _InfoChip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: AppTextStyles.labelSm.copyWith(
-              color: fg,
-              fontSize: 11,
-            ),
+            style: AppTextStyles.labelSm.copyWith(color: fg, fontSize: 11),
           ),
         ],
       ),

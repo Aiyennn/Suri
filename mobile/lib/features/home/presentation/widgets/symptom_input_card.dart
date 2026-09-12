@@ -13,7 +13,6 @@ import '../../models/chatbot_response.dart';
 const _intentWound = 'wound_assessment';
 const _intentSkin = 'skin_assessment';
 const _intentSymptom = 'symptom_assessment';
-const _intentClarify = 'needs_clarification';
 // general_conversation → no CTA needed
 
 // ── Data model ────────────────────────────────────────────────────────────────
@@ -110,30 +109,36 @@ class _SymptomInputCardState extends State<SymptomInputCard> {
       if (!mounted) return;
       setState(() {
         _isTyping = false;
-        _messages.add(_ChatMessage(
-          role: _MessageRole.ai,
-          text: response.reply,
-          assessmentIntent: intent,
-        ));
+        _messages.add(
+          _ChatMessage(
+            role: _MessageRole.ai,
+            text: response.reply,
+            assessmentIntent: intent,
+          ),
+        );
       });
     } on ChatbotException catch (e) {
       if (!mounted) return;
       setState(() {
         _isTyping = false;
-        _messages.add(_ChatMessage(
-          role: _MessageRole.ai,
-          text: "I'm sorry, I couldn't process that right now. ${e.message}",
-        ));
+        _messages.add(
+          _ChatMessage(
+            role: _MessageRole.ai,
+            text: "I'm sorry, I couldn't process that right now. ${e.message}",
+          ),
+        );
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _isTyping = false;
-        _messages.add(const _ChatMessage(
-          role: _MessageRole.ai,
-          text:
-              "I'm having trouble connecting right now. Please check your network and try again.",
-        ));
+        _messages.add(
+          const _ChatMessage(
+            role: _MessageRole.ai,
+            text:
+                "I'm having trouble connecting right now. Please check your network and try again.",
+          ),
+        );
       });
     }
 
@@ -195,7 +200,11 @@ class _SymptomInputCardState extends State<SymptomInputCard> {
           // ── Header ───────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              0,
+            ),
             child: Row(
               children: [
                 Container(
@@ -207,8 +216,11 @@ class _SymptomInputCardState extends State<SymptomInputCard> {
                     ),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.auto_awesome_rounded,
-                      color: Colors.white, size: 17),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Colors.white,
+                    size: 17,
+                  ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Text(
@@ -255,7 +267,11 @@ class _SymptomInputCardState extends State<SymptomInputCard> {
           // ── Input row ─────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -322,8 +338,9 @@ class _SymptomInputCardState extends State<SymptomInputCard> {
                       boxShadow: (_hasText && !_isTyping)
                           ? [
                               BoxShadow(
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.28),
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.28,
+                                ),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -345,7 +362,9 @@ class _SymptomInputCardState extends State<SymptomInputCard> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
-                vertical: AppSpacing.sm, horizontal: AppSpacing.lg),
+              vertical: AppSpacing.sm,
+              horizontal: AppSpacing.lg,
+            ),
             decoration: const BoxDecoration(
               color: Color(0xFFFFFFFF),
               borderRadius: BorderRadius.only(
@@ -356,13 +375,18 @@ class _SymptomInputCardState extends State<SymptomInputCard> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.shield_outlined,
-                    size: 12, color: AppColors.textTertiary),
+                Icon(
+                  Icons.shield_outlined,
+                  size: 12,
+                  color: AppColors.textTertiary,
+                ),
                 const SizedBox(width: 5),
                 Text(
                   'Your conversations are private and secure',
                   style: GoogleFonts.inter(
-                      fontSize: 11, color: AppColors.textTertiary),
+                    fontSize: 11,
+                    color: AppColors.textTertiary,
+                  ),
                 ),
               ],
             ),
@@ -379,10 +403,7 @@ class _MessageBubble extends StatefulWidget {
   final _ChatMessage message;
   final VoidCallback onAssessmentTap;
 
-  const _MessageBubble({
-    required this.message,
-    required this.onAssessmentTap,
-  });
+  const _MessageBubble({required this.message, required this.onAssessmentTap});
 
   @override
   State<_MessageBubble> createState() => _MessageBubbleState();
@@ -398,7 +419,9 @@ class _MessageBubbleState extends State<_MessageBubble>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 320));
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    );
     _opacity = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.12),
@@ -423,8 +446,9 @@ class _MessageBubbleState extends State<_MessageBubble>
         child: Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.sm),
           child: Row(
-            mainAxisAlignment:
-                isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!isUser) ...[
@@ -439,15 +463,13 @@ class _MessageBubbleState extends State<_MessageBubble>
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.sm + 2),
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm + 2,
+                      ),
                       decoration: BoxDecoration(
                         gradient: isUser
                             ? const LinearGradient(
-                                colors: [
-                                  Color(0xFF4F46E5),
-                                  Color(0xFF2563EB),
-                                ],
+                                colors: [Color(0xFF4F46E5), Color(0xFF2563EB)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
@@ -478,8 +500,7 @@ class _MessageBubbleState extends State<_MessageBubble>
                     ),
 
                     // Assessment CTA button — shown only for specific intents
-                    if (!isUser &&
-                        widget.message.assessmentIntent != null) ...[
+                    if (!isUser && widget.message.assessmentIntent != null) ...[
                       const SizedBox(height: AppSpacing.sm),
                       _AssessmentCta(
                         intent: widget.message.assessmentIntent!,
@@ -522,9 +543,13 @@ class _AssessmentCtaState extends State<_AssessmentCta>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 120));
-    _scale = Tween<double>(begin: 1.0, end: 0.95)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -589,7 +614,9 @@ class _AssessmentCtaState extends State<_AssessmentCta>
         scale: _scale,
         child: Container(
           padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg, vertical: AppSpacing.sm + 2),
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm + 2,
+          ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: _gradient,
@@ -620,8 +647,11 @@ class _AssessmentCtaState extends State<_AssessmentCta>
                 ),
               ),
               const SizedBox(width: 6),
-              const Icon(Icons.arrow_forward_rounded,
-                  color: Colors.white, size: 14),
+              const Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white,
+                size: 14,
+              ),
             ],
           ),
         ),
@@ -646,8 +676,11 @@ class _AiAvatar extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Icon(Icons.auto_awesome_rounded,
-          color: Colors.white, size: 14),
+      child: const Icon(
+        Icons.auto_awesome_rounded,
+        color: Colors.white,
+        size: 14,
+      ),
     );
   }
 }
@@ -662,8 +695,11 @@ class _UserAvatar extends StatelessWidget {
         color: const Color(0xFFE0E7FF),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Icon(Icons.person_rounded,
-          color: Color(0xFF4F46E5), size: 16),
+      child: const Icon(
+        Icons.person_rounded,
+        color: Color(0xFF4F46E5),
+        size: 16,
+      ),
     );
   }
 }
@@ -685,8 +721,9 @@ class _TypingIndicatorState extends State<_TypingIndicator>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900))
-      ..repeat();
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
   }
 
   @override
@@ -705,7 +742,9 @@ class _TypingIndicatorState extends State<_TypingIndicator>
           const SizedBox(width: AppSpacing.xs),
           Container(
             padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md, vertical: AppSpacing.sm + 4),
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm + 4,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFF1F5FF),
               borderRadius: const BorderRadius.only(
@@ -724,17 +763,15 @@ class _TypingIndicatorState extends State<_TypingIndicator>
             ),
             child: AnimatedBuilder(
               animation: _ctrl,
-              builder: (_, __) => Row(
+              builder: (_, _) => Row(
                 mainAxisSize: MainAxisSize.min,
                 children: List.generate(3, (i) {
-                  final progress =
-                      (_ctrl.value - i * 0.25).clamp(0.0, 1.0);
+                  final progress = (_ctrl.value - i * 0.25).clamp(0.0, 1.0);
                   final bounce = math.sin(progress * math.pi);
                   return Transform.translate(
                     offset: Offset(0, -4 * bounce),
                     child: Container(
-                      margin:
-                          const EdgeInsets.symmetric(horizontal: 2.5),
+                      margin: const EdgeInsets.symmetric(horizontal: 2.5),
                       width: 7,
                       height: 7,
                       decoration: BoxDecoration(

@@ -109,8 +109,6 @@ final runAssessmentUseCaseProvider = Provider<RunAssessment>((ref) {
 /// Main assessment state provider.
 final assessmentProvider =
     StateNotifierProvider<AssessmentNotifier, AssessmentState>((ref) {
-  return AssessmentNotifier(ref.read(runAssessmentUseCaseProvider), ref);
-});
       return AssessmentNotifier(ref.read(runAssessmentUseCaseProvider), ref);
     });
 
@@ -121,7 +119,6 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
   final Ref _ref;
 
   AssessmentNotifier(this._runAssessment, this._ref)
-      : super(const AssessmentState());
     : super(const AssessmentState());
 
   // ─── Patient Details ───
@@ -137,7 +134,6 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
   void addSymptom(String symptom) {
     if (!state.patient.symptoms.contains(symptom)) {
       final updated = [...state.patient.symptoms, symptom];
-      state = state.copyWith(patient: state.patient.copyWith(symptoms: updated));
       state = state.copyWith(
         patient: state.patient.copyWith(symptoms: updated),
       );
@@ -180,10 +176,6 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
   }
 
   void clearAllImages() {
-    state = state.copyWith(
-      uploadedImagePaths: [],
-      categoryImageCounts: {},
-    );
     state = state.copyWith(uploadedImagePaths: [], categoryImageCounts: {});
   }
 
@@ -192,16 +184,12 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
     final riskLevel = item.riskLevel ?? 'Moderate';
     final isEmergency = item.emergency ?? false;
     final isReferral =
-        riskLevel.toLowerCase() == 'high' || riskLevel.toLowerCase() == 'critical' || isEmergency;
         riskLevel.toLowerCase() == 'high' ||
         riskLevel.toLowerCase() == 'critical' ||
         isEmergency;
 
     final followUp = isEmergency
         ? 'Immediate Emergency Evaluation'
-        : (riskLevel.toLowerCase() == 'high' || riskLevel.toLowerCase() == 'critical')
-            ? 'Consult clinician within 24 hours'
-            : 'Review in 3–5 days';
         : (riskLevel.toLowerCase() == 'high' ||
               riskLevel.toLowerCase() == 'critical')
         ? 'Consult clinician within 24 hours'
@@ -209,10 +197,6 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
 
     final conditionName = item.woundType != null && item.woundType!.isNotEmpty
         ? item.woundType!
-            .replaceAll('_', ' ')
-            .split(' ')
-            .map((s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1))
-            .join(' ')
               .replaceAll('_', ' ')
               .split(' ')
               .map((s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1))
@@ -222,7 +206,6 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
     final recommendations = <String>[
       if (isEmergency)
         'Seek immediate emergency medical attention.'
-      else if (riskLevel.toLowerCase() == 'high' || riskLevel.toLowerCase() == 'critical')
       else if (riskLevel.toLowerCase() == 'high' ||
           riskLevel.toLowerCase() == 'critical')
         'Schedule an urgent consultation with a qualified medical specialist.'
@@ -337,8 +320,6 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
         if (!mounted) return;
 
         // Mark step as completed
-        final updatedStatuses =
-            Map<AnalysisStep, StepStatus>.from(state.stepStatuses);
         final updatedStatuses = Map<AnalysisStep, StepStatus>.from(
           state.stepStatuses,
         );

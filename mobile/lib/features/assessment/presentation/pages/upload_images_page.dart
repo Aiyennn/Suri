@@ -26,7 +26,7 @@ class UploadImagesPage extends ConsumerStatefulWidget {
 }
 
 class _UploadImagesPageState extends ConsumerState<UploadImagesPage> {
-  bool _dropHover = false; // visual feedback for drag hover
+  final bool _dropHover = false; // visual feedback for drag hover
 
   Future<void> _pickFromGallery() async {
     final picker = ImagePicker();
@@ -39,8 +39,10 @@ class _UploadImagesPageState extends ConsumerState<UploadImagesPage> {
 
   Future<void> _pickFromCamera() async {
     final picker = ImagePicker();
-    final XFile? picked =
-        await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+    final XFile? picked = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+    );
     if (!mounted || picked == null) return;
     ref.read(assessmentProvider.notifier).addImage(picked.path, 'general');
   }
@@ -132,7 +134,9 @@ class _StepBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xs,
+      ),
       child: Row(
         children: List.generate(3, (i) {
           return Expanded(
@@ -140,7 +144,9 @@ class _StepBar extends StatelessWidget {
               margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
               height: 3,
               decoration: BoxDecoration(
-                color: i < current ? AppColors.primary : const Color(0xFFDDE3EF),
+                color: i < current
+                    ? AppColors.primary
+                    : const Color(0xFFDDE3EF),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -217,8 +223,11 @@ class _CloudIllustration extends StatelessWidget {
                   color: const Color(0xFFE0E7FF),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(Icons.image_outlined,
-                    size: 18, color: Color(0xFF818CF8)),
+                child: const Icon(
+                  Icons.image_outlined,
+                  size: 18,
+                  color: Color(0xFF818CF8),
+                ),
               ),
             ),
           ),
@@ -235,8 +244,11 @@ class _CloudIllustration extends StatelessWidget {
                   color: const Color(0xFFC7D2FE),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(Icons.image_rounded,
-                    size: 18, color: Color(0xFF6366F1)),
+                child: const Icon(
+                  Icons.image_rounded,
+                  size: 18,
+                  color: Color(0xFF6366F1),
+                ),
               ),
             ),
           ),
@@ -258,8 +270,11 @@ class _CloudIllustration extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(Icons.cloud_upload_outlined,
-                  size: 24, color: Colors.white),
+              child: const Icon(
+                Icons.cloud_upload_outlined,
+                size: 24,
+                color: Colors.white,
+              ),
             ),
           ),
         ],
@@ -291,14 +306,10 @@ class _DropZone extends StatelessWidget {
         horizontal: AppSpacing.xxl,
       ),
       decoration: BoxDecoration(
-        color: isHovered
-            ? AppColors.primaryLight
-            : Colors.white,
+        color: isHovered ? AppColors.primaryLight : Colors.white,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(
-          color: isHovered
-              ? AppColors.primary
-              : const Color(0xFFD0D5E8),
+          color: isHovered ? AppColors.primary : const Color(0xFFD0D5E8),
           width: 1.5,
           // Dashed border simulated via the decoration below
         ),
@@ -369,8 +380,11 @@ class _DropZone extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.photo_library_outlined,
-                      size: 16, color: Colors.white),
+                  const Icon(
+                    Icons.photo_library_outlined,
+                    size: 16,
+                    color: Colors.white,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Browse Files',
@@ -401,8 +415,11 @@ class _DropZone extends StatelessWidget {
               Tooltip(
                 message:
                     'High-quality, well-lit photos improve AI analysis accuracy.',
-                child: Icon(Icons.info_outline_rounded,
-                    size: 13, color: AppColors.textTertiary),
+                child: Icon(
+                  Icons.info_outline_rounded,
+                  size: 13,
+                  color: AppColors.textTertiary,
+                ),
               ),
             ],
           ),
@@ -414,8 +431,11 @@ class _DropZone extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.camera_alt_outlined,
-                    size: 14, color: AppColors.primary),
+                Icon(
+                  Icons.camera_alt_outlined,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 5),
                 Text(
                   'Take a photo instead',
@@ -521,14 +541,16 @@ class _ImageGrid extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                border: Border.all(
-                    color: const Color(0xFFD0D5E8), width: 1.5),
+                border: Border.all(color: const Color(0xFFD0D5E8), width: 1.5),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.add_photo_alternate_outlined,
-                      size: 24, color: AppColors.primary),
+                  Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: 24,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     'Add more',
@@ -567,20 +589,24 @@ class _ImageTile extends StatelessWidget {
       return Image.network(
         path,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
+        errorBuilder: (_, _, _) => Container(
           color: AppColors.primaryLight,
-          child: const Icon(Icons.broken_image_outlined,
-              color: AppColors.primary),
+          child: const Icon(
+            Icons.broken_image_outlined,
+            color: AppColors.primary,
+          ),
         ),
       );
     }
     return Image.file(
       File(path),
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Container(
+      errorBuilder: (_, _, _) => Container(
         color: AppColors.primaryLight,
-        child: const Icon(Icons.broken_image_outlined,
-            color: AppColors.primary),
+        child: const Icon(
+          Icons.broken_image_outlined,
+          color: AppColors.primary,
+        ),
       ),
     );
   }
@@ -608,8 +634,11 @@ class _ImageTile extends StatelessWidget {
                 color: Colors.black54,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close_rounded,
-                  size: 13, color: Colors.white),
+              child: const Icon(
+                Icons.close_rounded,
+                size: 13,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -641,8 +670,11 @@ class _TipsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.lightbulb_outline_rounded,
-                  size: 16, color: Color(0xFFF59E0B)),
+              const Icon(
+                Icons.lightbulb_outline_rounded,
+                size: 16,
+                color: Color(0xFFF59E0B),
+              ),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 'Photo Tips for Best Results',
@@ -655,36 +687,38 @@ class _TipsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          ...tips.map((t) => Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Container(
-                        width: 5,
-                        height: 5,
-                        decoration: const BoxDecoration(
-                          color: AppColors.textTertiary,
-                          shape: BoxShape.circle,
-                        ),
+          ...tips.map(
+            (t) => Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: AppColors.textTertiary,
+                        shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        t,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                          height: 1.4,
-                        ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      t,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        height: 1.4,
                       ),
                     ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -738,8 +772,11 @@ class _BottomBar extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.arrow_back_rounded,
-                      size: 16, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.arrow_back_rounded,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Back',
@@ -766,13 +803,11 @@ class _BottomBar extends StatelessWidget {
                   height: 52,
                   decoration: BoxDecoration(
                     color: AppColors.primary,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusFull),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                     boxShadow: canContinue
                         ? [
                             BoxShadow(
-                              color:
-                                  AppColors.primary.withValues(alpha: 0.35),
+                              color: AppColors.primary.withValues(alpha: 0.35),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -791,8 +826,11 @@ class _BottomBar extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward_rounded,
-                          size: 16, color: Colors.white),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                     ],
                   ),
                 ),

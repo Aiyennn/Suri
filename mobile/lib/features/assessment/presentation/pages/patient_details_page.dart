@@ -17,8 +17,7 @@ class PatientDetailsPage extends ConsumerStatefulWidget {
   const PatientDetailsPage({super.key});
 
   @override
-  ConsumerState<PatientDetailsPage> createState() =>
-      _PatientDetailsPageState();
+  ConsumerState<PatientDetailsPage> createState() => _PatientDetailsPageState();
 }
 
 class _PatientDetailsPageState extends ConsumerState<PatientDetailsPage> {
@@ -37,9 +36,11 @@ class _PatientDetailsPageState extends ConsumerState<PatientDetailsPage> {
     final query = _searchController.text.toLowerCase();
     final selected = ref.read(assessmentProvider).patient.symptoms;
     return SymptomSuggestions.all
-        .where((s) =>
-            s.name.toLowerCase().contains(query) &&
-            !selected.contains(s.name))
+        .where(
+          (s) =>
+              s.name.toLowerCase().contains(query) &&
+              !selected.contains(s.name),
+        )
         .toList();
   }
 
@@ -145,8 +146,7 @@ class _PatientDetailsPageState extends ConsumerState<PatientDetailsPage> {
                         ),
 
                         // Suggestion dropdown
-                        if (_showSuggestions &&
-                            _filteredSuggestions.isNotEmpty)
+                        if (_showSuggestions && _filteredSuggestions.isNotEmpty)
                           _SuggestionDropdown(
                             suggestions: _filteredSuggestions,
                             onTap: _addSymptomFromSearch,
@@ -159,11 +159,12 @@ class _PatientDetailsPageState extends ConsumerState<PatientDetailsPage> {
                             spacing: AppSpacing.xs,
                             runSpacing: AppSpacing.xs,
                             children: state.patient.symptoms
-                                .map((s) => _SymptomChip(
-                                      label: s,
-                                      onRemove: () =>
-                                          notifier.removeSymptom(s),
-                                    ))
+                                .map(
+                                  (s) => _SymptomChip(
+                                    label: s,
+                                    onRemove: () => notifier.removeSymptom(s),
+                                  ),
+                                )
                                 .toList(),
                           ),
                         ],
@@ -235,10 +236,7 @@ class _StepProgressBar extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
 
-  const _StepProgressBar({
-    required this.currentStep,
-    required this.totalSteps,
-  });
+  const _StepProgressBar({required this.currentStep, required this.totalSteps});
 
   @override
   Widget build(BuildContext context) {
@@ -286,8 +284,11 @@ class _BackPill extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.chevron_left_rounded,
-                size: 18, color: AppColors.primary),
+            const Icon(
+              Icons.chevron_left_rounded,
+              size: 18,
+              color: AppColors.primary,
+            ),
             Text(
               'Back',
               style: GoogleFonts.inter(
@@ -418,7 +419,7 @@ class _FieldCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (trailing != null) trailing!,
+              ?trailing,
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -443,10 +444,7 @@ class _AgeInput extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.number,
       onChanged: onChanged,
-      style: GoogleFonts.inter(
-        fontSize: 15,
-        color: AppColors.textPrimary,
-      ),
+      style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: AppStrings.enterAge,
         hintStyle: GoogleFonts.inter(
@@ -482,10 +480,7 @@ class _SexSelector extends StatelessWidget {
   final String? selectedValue;
   final ValueChanged<String> onSelected;
 
-  const _SexSelector({
-    required this.selectedValue,
-    required this.onSelected,
-  });
+  const _SexSelector({required this.selectedValue, required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -510,7 +505,9 @@ class _SexSelector extends StatelessWidget {
                   color: isSelected ? AppColors.primaryLight : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : const Color(0xFFDDE3EF),
+                    color: isSelected
+                        ? AppColors.primary
+                        : const Color(0xFFDDE3EF),
                     width: isSelected ? 1.5 : 1,
                   ),
                 ),
@@ -529,8 +526,9 @@ class _SexSelector extends StatelessWidget {
                       opt.label,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
                         color: isSelected
                             ? AppColors.primary
                             : AppColors.textSecondary,
@@ -574,8 +572,11 @@ class _SymptomSearchField extends StatelessWidget {
       onTap: onTap,
       style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.search_rounded,
-            size: 18, color: AppColors.textTertiary),
+        prefixIcon: const Icon(
+          Icons.search_rounded,
+          size: 18,
+          color: AppColors.textTertiary,
+        ),
         hintText: AppStrings.searchSymptoms,
         hintStyle: GoogleFonts.inter(
           fontSize: 14,
@@ -610,10 +611,7 @@ class _SuggestionDropdown extends StatelessWidget {
   final List<Symptom> suggestions;
   final ValueChanged<String> onTap;
 
-  const _SuggestionDropdown({
-    required this.suggestions,
-    required this.onTap,
-  });
+  const _SuggestionDropdown({required this.suggestions, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -636,11 +634,13 @@ class _SuggestionDropdown extends StatelessWidget {
         shrinkWrap: true,
         padding: EdgeInsets.zero,
         children: suggestions
-            .map((s) => ListTile(
-                  dense: true,
-                  title: Text(s.name, style: AppTextStyles.bodyMd),
-                  onTap: () => onTap(s.name),
-                ))
+            .map(
+              (s) => ListTile(
+                dense: true,
+                title: Text(s.name, style: AppTextStyles.bodyMd),
+                onTap: () => onTap(s.name),
+              ),
+            )
             .toList(),
       ),
     );
@@ -678,8 +678,11 @@ class _SymptomChip extends StatelessWidget {
           const SizedBox(width: 4),
           GestureDetector(
             onTap: onRemove,
-            child: const Icon(Icons.close_rounded,
-                size: 14, color: AppColors.primary),
+            child: const Icon(
+              Icons.close_rounded,
+              size: 14,
+              color: AppColors.primary,
+            ),
           ),
         ],
       ),
@@ -745,8 +748,9 @@ class _DurationGrid extends StatelessWidget {
                     opt.label,
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w500,
                       color: isSelected
                           ? AppColors.primary
                           : AppColors.textSecondary,
@@ -816,8 +820,11 @@ class _PrivacyNotice extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lock_outline_rounded,
-              size: 15, color: AppColors.primary),
+          const Icon(
+            Icons.lock_outline_rounded,
+            size: 15,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
@@ -878,8 +885,11 @@ class _ContinueButton extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward_rounded,
-                  size: 18, color: Colors.white),
+              const Icon(
+                Icons.arrow_forward_rounded,
+                size: 18,
+                color: Colors.white,
+              ),
             ],
           ),
           style: ElevatedButton.styleFrom(
