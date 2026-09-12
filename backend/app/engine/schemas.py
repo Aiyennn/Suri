@@ -169,6 +169,13 @@ class AssessmentResult(BaseModel):
     referral_required: bool = Field(description="Whether healthcare-provider referral is advised.")
     emergency: bool = Field(description="Whether an emergency response may be warranted.")
     follow_up: str = Field(description="Recommended follow-up timeframe.")
+    monitoring_signs: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Ordered, deduplicated list of symptoms or signs the patient/clinician "
+            "should watch for, derived from the triggered rules."
+        ),
+    )
     triggered_rules: list[TriggeredRule] = Field(
         description="All rules that matched and contributed to this assessment."
     )

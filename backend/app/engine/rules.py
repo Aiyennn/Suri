@@ -91,6 +91,9 @@ class Rule:
     forces_referral: bool = False
     forces_emergency: bool = False
     follow_up_hours: int | None = None
+    monitoring: str = (
+        ""  # Signs/symptoms to watch for; empty string means no specific monitoring guidance.
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -126,6 +129,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=True,
         follow_up_hours=0,
+        monitoring=(
+            "Uncontrolled or worsening bleeding, loss of consciousness, "
+            "or signs of shock (pale skin, rapid weak pulse, confusion)."
+        ),
     ),
 
     Rule(
@@ -144,6 +151,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=True,
         follow_up_hours=0,
+        monitoring=(
+            "Bleeding that does not slow or stop after 10 minutes of firm, "
+            "continuous pressure; blood soaking through multiple dressings."
+        ),
     ),
 
     Rule(
@@ -161,6 +172,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=24,
+        monitoring=(
+            "Expanding dark, black, or foul-smelling tissue; "
+            "worsening wound size; fever or chills."
+        ),
     ),
 
     Rule(
@@ -179,6 +194,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=24,
+        monitoring=(
+            "Increasing or thickening pus; spreading redness, warmth, or swelling; "
+            "fever above 38 °C (100.4 °F); worsening pain around the wound."
+        ),
     ),
 
     # -----------------------------------------------------------------------
@@ -200,6 +219,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=24,
+        monitoring=(
+            "Increasing pain, swelling, or warmth; wound enlarging; "
+            "red streaking lines spreading from the wound; fever."
+        ),
     ),
 
     Rule(
@@ -217,6 +240,10 @@ RULES: list[Rule] = [
         forces_referral=False,
         forces_emergency=False,
         follow_up_hours=48,
+        monitoring=(
+            "Worsening pain or swelling not improving within 48 hours; "
+            "new discharge or change in discharge colour."
+        ),
     ),
 
     Rule(
@@ -256,6 +283,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=24,
+        monitoring=(
+            "New or enlarging blisters; skin turning white, brown, or charred; "
+            "increasing pain or, conversely, loss of sensation in the burned area; fever."
+        ),
     ),
 
     Rule(
@@ -292,6 +323,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=24,
+        monitoring=(
+            "Wound enlarging or deepening; change in skin colour (dark, blue, or black); "
+            "increased numbness or tingling; foul odour; fever or high blood sugar."
+        ),
     ),
 
     Rule(
@@ -327,6 +362,11 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=48,
+        monitoring=(
+            "Deep or throbbing pain increasing over time; "
+            "red streaking lines extending from the wound entry point; "
+            "swelling, warmth, or pus at the entry site; fever."
+        ),
     ),
 
     # -----------------------------------------------------------------------
@@ -355,6 +395,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=24,
+        monitoring=(
+            "No visible signs of healing improvement after a further 48 hours; "
+            "wound enlarging, deepening, or developing an odour."
+        ),
     ),
 
     Rule(
@@ -381,6 +425,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=48,
+        monitoring=(
+            "Continued inflammation, redness, or exudate beyond 7 days "
+            "with no visible reduction in wound size."
+        ),
     ),
 
     Rule(
@@ -451,6 +499,10 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=24,
+        monitoring=(
+            "Bleeding that resumes after initial pressure; "
+            "dressing soaking through repeatedly; light-headedness or rapid heartbeat."
+        ),
     ),
 
     Rule(
@@ -492,6 +544,11 @@ RULES: list[Rule] = [
         forces_referral=True,
         forces_emergency=False,
         follow_up_hours=24,
+        monitoring=(
+            "Sudden increase in drainage volume; "
+            "discharge changing colour to yellow or green; "
+            "skin around the wound becoming soggy, white, or breaking down."
+        ),
     ),
 
     Rule(
@@ -529,6 +586,10 @@ RULES: list[Rule] = [
         forces_referral=False,
         forces_emergency=False,
         follow_up_hours=48,
+        monitoring=(
+            "Increasing blood-tinged drainage; "
+            "bright red bleeding within the wound bed that does not slow."
+        ),
     ),
 
     Rule(
@@ -573,6 +634,11 @@ RULES: list[Rule] = [
         forces_referral=False,
         forces_emergency=False,
         follow_up_hours=None,
+        monitoring=(
+            "Redness spreading beyond the wound margin; "
+            "red streaking lines extending from the wound; "
+            "increasing warmth or tenderness in the surrounding skin."
+        ),
     ),
 
     # -----------------------------------------------------------------------
@@ -636,6 +702,9 @@ RULES: list[Rule] = [
         forces_referral=False,
         forces_emergency=False,
         follow_up_hours=None,
+        monitoring=(
+            "Any rapid or unexpected change in wound appearance, size, or patient symptoms."
+        ),
     ),
 
     Rule(

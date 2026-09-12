@@ -72,6 +72,11 @@ class AssessmentsHistoryNotifier
   /// - Only shows full loading indicator on the very first fetch when no cache exists.
   /// - Only updates state/re-renders if incoming data differs from existing data.
   Future<void> load({bool forceRefresh = false}) async {
+    final token = _ref.read(currentTokenProvider) ?? '';
+    if (token.isEmpty) {
+      return;
+    }
+
     if (state.hasLoadedOnce && !forceRefresh) {
       return;
     }
@@ -85,7 +90,6 @@ class AssessmentsHistoryNotifier
     }
 
     try {
-      final token = _ref.read(currentTokenProvider) ?? '';
       final result = await _repo.fetchAssessments(token: token);
 
       final newItems = result.assessments;
@@ -122,7 +126,7 @@ class AssessmentsHistoryNotifier
           isLoading: false,
           isRevalidating: false,
           error: e.toString(),
-          hasLoadedOnce: true,
+          hasLoadedOnce: false,
         );
       }
     }
@@ -152,6 +156,7 @@ class AssessmentsHistoryNotifier
 
 final assessmentsHistoryProvider = StateNotifierProvider<
     AssessmentsHistoryNotifier, AssessmentsHistoryState>((ref) {
+  ref.watch(currentTokenProvider);
   return AssessmentsHistoryNotifier(
     ref.read(assessmentsHistoryRepositoryProvider),
     ref,

@@ -25,6 +25,7 @@ at the API boundary, with all field validators already applied.  The service
 receives a fully-validated object and does not re-validate it.
 """
 
+from _pytest.config import exceptions
 import logging
 import uuid
 
@@ -48,11 +49,11 @@ from app.schemas.wound import (
 from app.services.image_decoder import decode_image
 from app.services.image_quality import assess_image_quality
 from app.repository.wound_repository import WoundAssessmentRepository
-
 from app.services.cache_service import (
     get_cache,
     set_cache
 )
+from app.services.assessment_explanation_service import AssessmentExplanationService
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +62,13 @@ _wound_engine = WoundAssessmentEngine()
 
 class WoundService:
 
-    def __init__(self, repository: WoundAssessmentRepository):
+    def __init__(
+        self,
+        repository: WoundAssessmentRepository,
+        explanation_service: AssessmentExplanationService,
+    ):
         self.repository = repository
+        self.explanation_service = explanation_service
 
     async def analyze_wound(
             self,
@@ -115,7 +121,7 @@ class WoundService:
                 image_bytes = await image.read()
 
                 # Run the analysis pipeline and persist results
-                result_dict = self.process_wound_image(
+                result_dict = await self.process_wound_image(
                     assessment_id=assessment_id,
                     image_bytes=image_bytes,
                     original_filename=image.filename,
@@ -139,15 +145,16 @@ class WoundService:
         except Exception as exc:
             logger.exception(
                 "Unexpected error during wound analysis "
-                "(images=%d age=%s sex=%s)",
+                "(images=%d age=%s sex=%s): %s",
                 len(images),
                 patient.age,
                 patient.sex,
+                exc,
             )
-            raise InternalServerError() from exc
+            raise
 
 
-    def process_wound_image(
+    async def process_wound_image(
         self,
         image_bytes: bytes,
         assessment_id: uuid.UUID,
@@ -252,13 +259,45 @@ class WoundService:
             disclaimer=assessment_dict["disclaimer"],
         )
 
+        clinicial_findings = [
+            rule["reason"]
+            for rule in assessment_dict["triggered_rules"]
+        ]
+
+        assessment_context = {
+            "symptoms": assessment_dict["triggered_rules"],
+            "wound_type": wound_type,
+            "severity": severity,
+            "healing_stage": healing_stage,
+            "confidence": confidence,
+            "risk_score": assessment_dict["risk_score"],
+            "risk_level": assessment_dict["risk_level"],
+            "recommendations": assessment_dict["recommendations"],
+            "monitoring_signs": assessment_dict["monitoring_signs"],
+            "clinical_findings": clinicial_findings
+        }
+
+        assessment_explanation = await self.explanation_service.generate(
+            assessment_context,
+        )
+
         # ── Build combined response ───────────────────────────────────────────
         result = {
             "wound_type": wound_type,
             "severity": severity,
             "healing_stage": healing_stage,
             "confidence": confidence,
-            **assessment_dict,
+            "risk_score": assessment_dict["risk_score"],
+            "risk_level": assessment_dict["risk_level"],
+            "recommendations": assessment_dict["recommendations"],
+            "referral_required": assessment_dict["referral_required"],
+            "emergency": assessment_dict["emergency"],
+            "follow_up": assessment_dict["follow_up"],
+            "monitoring_signs": assessment_dict["monitoring_signs"],
+            "triggered_rules": assessment_dict["triggered_rules"],
+            "disclaimer": assessment_dict["disclaimer"],
+            "assessment_explanation": assessment_explanation,
+            "clinical_findings": clinicial_findings,
         }
 
         return result

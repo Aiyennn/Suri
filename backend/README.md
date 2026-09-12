@@ -21,38 +21,41 @@ Client
   ↓
 FastAPI API
   ↓
-Image Validation
+Image Validation (OpenCV quality gating)
   ↓
 AI Vision Analysis
   ↓
-Clinical Rule Engine
+Clinical Rule Engine (Risk scoring, recommendations, monitoring signs, referrals, follow-up)
   ↓
-PostgreSQL
+Assessment Explanation Service
   ↓
-Redis (assessment history cache)
+PostgreSQL & Redis Cache
 ```
 
 The AI model produces visual observations, while the deterministic rule
-engine handles risk scoring, referrals, recommendations, and follow-ups.
+engine handles risk scoring, referrals, care recommendations, monitoring signs
+("What to Monitor" warning indicators), and follow-up scheduling. For in-depth
+details on rule definitions, scoring tables, and schema, refer to the [Wound Assessment Rule Engine README](app/engine/README.md).
 
 ## Project Structure
 
 ```text
 backend/
 ├── app/
-│   ├── ai/              # AI inference
-│   ├── api/             # API routes
+│   ├── ai/              # AI inference & mock vision model
+│   ├── api/             # API routes and dependencies
 │   ├── core/            # Config, security, logging
-│   ├── db/              # Database setup
-│   ├── engine/          # Rule-based assessment engine
-│   ├── models/          # SQLAlchemy models
-│   ├── repository/      # Database access
-│   ├── schemas/         # Pydantic schemas
-│   ├── services/        # Business logic
-│   └── utils/           # Shared utilities
+│   ├── db/              # Database setup & sessions
+│   ├── engine/          # Deterministic clinical rule engine (rules, scoring, monitoring, referrals)
+│   ├── models/          # SQLAlchemy database models
+│   ├── repository/      # Database access layers
+│   ├── schemas/         # Pydantic schemas (input, output, engine)
+│   ├── services/        # Business logic (wound analysis, explanation, caching, image quality)
+│   └── utils/           # Shared utilities (image metrics)
 ├── alembic/             # Database migrations
 ├── tests/               # Unit and integration tests
-└── scripts/              # Development utilities
+│   └── test_engine_pkg/ # Dedicated rule engine test suite
+└── scripts/             # Development utilities
 ```
 
 
@@ -101,9 +104,13 @@ API documentation:
 - **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
 ## Testing
-
+ 
 ```bash
+# Run all tests
 pytest
+
+# Run wound assessment rule engine tests specifically
+pytest tests/test_engine_pkg
 ```
 
 ## API

@@ -30,9 +30,11 @@ The mission of Suri is to make early health checkups accessible to everyone, hel
 * **Urgency & Clinical Risk Assessment**
   * Deterministic rule engine evaluating combined patient context + visual observations to calculate risk levels (*Low, Moderate, High/Critical*).
   * Immediate emergency detection flags and clinical referral recommendations.
+  * Context-aware **"What to Monitor"** guidance detailing specific warning signs, symptoms, and escalation triggers based on triggered rules.
+  * Structured clinical findings and plain-language assessment explanation generation.
 
 * **Care & Clinic Recommendations**
-  * Actionable follow-up guidance and directions toward appropriate healthcare services and nearby clinics.
+  * Actionable follow-up timeframes, prioritized self-care recommendations, and directions toward appropriate healthcare services and nearby clinics.
 
 ---
 

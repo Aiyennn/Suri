@@ -34,6 +34,7 @@ from sqlalchemy.orm import Session
 from app.repository.wound_repository import WoundAssessmentRepository
 from app.models.user import User
 from app.services.auth_service import get_current_user
+from app.services.assessment_explanation_service import AssessmentExplanationService
 
 from app.dependencies import get_db
 from app.schemas.wound import (
@@ -67,7 +68,8 @@ async def analyze_wound(
     current_user: User = Depends(get_current_user),
 ):
     repository = WoundAssessmentRepository(db)
-    service = WoundService(repository)
+    explanation_service = AssessmentExplanationService()    
+    service = WoundService(repository, explanation_service)
 
     try:
         result = await service.analyze_wound(patient, images, current_user.id)

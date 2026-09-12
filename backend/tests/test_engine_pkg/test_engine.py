@@ -121,8 +121,14 @@ class TestOutputShape:
         assert hasattr(result, "referral_required")
         assert hasattr(result, "emergency")
         assert hasattr(result, "follow_up")
+        assert hasattr(result, "monitoring_signs")
         assert hasattr(result, "triggered_rules")
         assert hasattr(result, "disclaimer")
+
+    def test_monitoring_signs_is_list_of_strings(self, engine):
+        result = engine.assess(MODERATE_ABRASION)
+        assert isinstance(result.monitoring_signs, list)
+        assert all(isinstance(s, str) for s in result.monitoring_signs)
 
     def test_recommendations_is_list_of_strings(self, engine):
         result = engine.assess(MODERATE_ABRASION)
@@ -259,3 +265,21 @@ class TestRecommendations:
         footer_keywords = ["clinical", "judgment", "healthcare"]
         combined = " ".join(result.recommendations).lower()
         assert any(kw in combined for kw in footer_keywords)
+
+
+# ---------------------------------------------------------------------------
+# Monitoring signs
+# ---------------------------------------------------------------------------
+
+class TestMonitoringSigns:
+    def test_emergency_scenario_monitoring_not_empty(self, engine):
+        result = engine.assess(EMERGENCY_SCENARIO)
+        assert len(result.monitoring_signs) > 0
+
+    def test_monitoring_signs_are_deduplicated(self, engine):
+        result = engine.assess(DIABETIC_ULCER_SCENARIO)
+        assert len(result.monitoring_signs) == len(set(result.monitoring_signs))
+
+    def test_low_risk_scenario_monitoring_signs_is_list(self, engine):
+        result = engine.assess(LOW_RISK_SCENARIO)
+        assert isinstance(result.monitoring_signs, list)

@@ -30,6 +30,7 @@ class Assessment {
   final bool referralRequired;
   final bool emergency;
   final String followUp;
+  final List<String> monitoringSigns;
   final List<TriggeredRule> triggeredRules;
   final String disclaimer;
 
@@ -40,6 +41,7 @@ class Assessment {
     required this.referralRequired,
     required this.emergency,
     required this.followUp,
+    required this.monitoringSigns,
     required this.triggeredRules,
     required this.disclaimer,
   });
@@ -59,6 +61,7 @@ class Assessment {
       referralRequired: result['referral_required'] as bool? ?? false,
       emergency: result['emergency'] as bool? ?? false,
       followUp: result['follow_up'] as String? ?? '',
+      monitoringSigns: (result['monitoring_signs'] as List<dynamic>?)?.cast<String>() ?? [],
       triggeredRules: (result['triggered_rules'] as List<dynamic>?)
               ?.map((r) => TriggeredRule.fromJson(r as Map<String, dynamic>))
               .toList() ??

@@ -224,6 +224,13 @@ class WoundAnalysisResult(BaseModel):
         description="Recommended follow-up timeframe.",
         examples=["Review in 48 hours"],
     )
+    monitoring_signs: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Ordered, deduplicated list of symptoms or signs the patient/clinician "
+            "should watch for, derived from triggered rules."
+        ),
+    )
     triggered_rules: list[TriggeredRule] = Field(
         description="All rules that matched and contributed to this assessment."
     )

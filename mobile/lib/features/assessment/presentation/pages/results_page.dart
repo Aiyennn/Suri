@@ -14,6 +14,7 @@ import '../../../../shared/widgets/primary_button.dart';
 import '../providers/assessment_provider.dart';
 import '../widgets/ai_reasoning_section.dart';
 import '../widgets/condition_list_item.dart';
+import '../widgets/monitoring_signs_section.dart';
 import '../widgets/recommendation_card.dart';
 import '../widgets/urgency_score_card.dart';
 
@@ -106,6 +107,13 @@ class _ResultsPageState extends ConsumerState<ResultsPage> {
                 ),
               ),
             const SizedBox(height: AppSpacing.xl),
+
+            // What to Monitor
+            MonitoringSignsSection(
+              signs: assessment.monitoringSigns,
+            ),
+            if (assessment.monitoringSigns.isNotEmpty)
+              const SizedBox(height: AppSpacing.xl),
 
             // AI Reasoning (All recommendations)
             AiReasoningSection(

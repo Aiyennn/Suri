@@ -19,6 +19,7 @@ import logging
 
 from app.engine.evaluator import RuleEvaluator
 from app.engine.followup import FollowUpScheduler
+from app.engine.monitoring import MonitoringBuilder
 from app.engine.schemas import AssessmentResult, TriggeredRule
 from app.engine.recommendations import RecommendationBuilder
 from app.engine.referrals import ReferralChecker
@@ -38,12 +39,14 @@ class WoundAssessmentEngine:
         recommendation_engine: RecommendationBuilder | None = None,
         referral_engine: ReferralChecker | None = None,
         follow_up_scheduler: FollowUpScheduler | None = None,
+        monitoring_engine: MonitoringBuilder | None = None,
     ) -> None:
         self._evaluator = evaluator or RuleEvaluator(rule_registry)
         self._scorer = scorer or RiskScorer()
         self._recommender = recommendation_engine or RecommendationBuilder()
         self._referral = referral_engine or ReferralChecker()
         self._follow_up = follow_up_scheduler or FollowUpScheduler()
+        self._monitoring = monitoring_engine or MonitoringBuilder()
 
     def assess(self, raw_model_output: dict, patient_context: dict | None = None) -> AssessmentResult:
 
@@ -79,6 +82,9 @@ class WoundAssessmentEngine:
         # 4. Recommendations
         recommendations = self._recommender.build(evaluation_result)
 
+        # 4.5. Monitoring signs
+        monitoring_signs = self._monitoring.build(evaluation_result)
+
         # 5. Referral
         referral_required = self._referral.requires_referral(
             evaluation_result, risk_level
@@ -113,6 +119,7 @@ class WoundAssessmentEngine:
             risk_score=risk_score,
             risk_level=risk_level,
             recommendations=recommendations,
+            monitoring_signs=monitoring_signs,
             referral_required=referral_required,
             emergency=emergency,
             follow_up=follow_up,
