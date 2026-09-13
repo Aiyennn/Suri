@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: suri_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: suri_user
+      POSTGRES_PASSWORD: suri_pass
+      POSTGRES_DB: suri_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - suri_postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U suri_user -d suri_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: suri_redis_dev
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - suri_redis_dev_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  suri_postgres_dev_data:
+  suri_redis_dev_data:
+

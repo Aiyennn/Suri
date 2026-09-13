@@ -24,6 +24,7 @@ async def lifespan(app: FastAPI):
     """Initialize and release infrastructure owned by this app instance."""
     configure_logging()
     logger.info("Application starting...")
+    logger.info("Environment : %s", settings.ENVIRONMENT)
     engine = None
     redis_client = None
     try:
@@ -32,6 +33,8 @@ async def lifespan(app: FastAPI):
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
         redis_client = create_redis_client(settings)
+        logger.info("Database    : %s", settings.db_url_safe)
+        logger.info("Redis       : %s", settings.REDIS_URL)
         app.state.database_engine = engine
         app.state.session_factory = session_factory
         app.state.redis_client = redis_client
