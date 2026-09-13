@@ -58,7 +58,8 @@ class AuthRepository {
       'email': email,
       'password': password,
       'full_name': fullName,
-      'sex': ?sex,
+      // Backend expects lowercase: "male" | "female" | "other"
+      'sex': ?sex?.toLowerCase(),
       'date_of_birth': ?dateOfBirth,
       'medical_history': ?medicalHistory,
     };
