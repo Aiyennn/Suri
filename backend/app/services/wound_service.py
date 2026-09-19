@@ -25,7 +25,6 @@ at the API boundary, with all field validators already applied.  The service
 receives a fully-validated object and does not re-validate it.
 """
 
-from _pytest.config import exceptions
 import logging
 import uuid
 
@@ -46,15 +45,20 @@ from app.schemas.wound import (
     WoundAnalysisResponse,
     WoundAnalysisResult,
 )
+
 from app.services.image_decoder import decode_image
 from app.services.image_quality import assess_image_quality
 from app.repository.wound_repository import WoundAssessmentRepository
-from app.services.assessment_explanation_service import AssessmentExplanationService
+from app.services.assessment_explanation_service import (
+    AssessmentContext,
+    AssessmentExplanationService,
+)
 
 logger = logging.getLogger(__name__)
 
 # Module-level engine instance — initialised once, reused across requests.
 _wound_engine = WoundAssessmentEngine()
+
 
 class WoundService:
 
@@ -67,11 +71,11 @@ class WoundService:
         self.explanation_service = explanation_service
 
     async def analyze_wound(
-            self,
-            patient: PatientInfo,
-            images: list[UploadFile],
-            user_id: uuid.UUID,
-            ) -> WoundAnalysisResponse:
+        self,
+        patient: PatientInfo,
+        images: list[UploadFile],
+        user_id: uuid.UUID,
+    ) -> WoundAnalysisResponse:
         """
         Orchestrate the full wound-analysis pipeline for one submission.
 
@@ -255,23 +259,27 @@ class WoundService:
             disclaimer=assessment_dict["disclaimer"],
         )
 
-        clinicial_findings = [
+        clinical_findings = [
             rule["reason"]
             for rule in assessment_dict["triggered_rules"]
         ]
 
-        assessment_context = {
-            "symptoms": assessment_dict["triggered_rules"],
-            "wound_type": wound_type,
-            "severity": severity,
-            "healing_stage": healing_stage,
-            "confidence": confidence,
-            "risk_score": assessment_dict["risk_score"],
-            "risk_level": assessment_dict["risk_level"],
-            "recommendations": assessment_dict["recommendations"],
-            "monitoring_signs": assessment_dict["monitoring_signs"],
-            "clinical_findings": clinicial_findings
-        }
+        # ── Build AssessmentContext for the explanation service ────────────────
+        # Extract image-level observations from the model output if available.
+        observations = model_output.get("observations", {})
+        assessment_context = AssessmentContext(
+            symptoms=[],  # patient symptoms are not available at this stage
+            wound_type=wound_type,
+            severity=severity,
+            healing_stage=healing_stage,
+            redness=observations.get("redness", False),
+            bleeding=observations.get("bleeding", "none"),
+            exudate_present=observations.get("exudate_present", False),
+            exudate_type=observations.get("exudate_type", "none"),
+            exudate_amount=observations.get("exudate_amount", "none"),
+            triggered_rule_reasons=clinical_findings,
+            confidence=confidence,
+        )
 
         assessment_explanation = await self.explanation_service.generate(
             assessment_context,
@@ -293,53 +301,51 @@ class WoundService:
             "triggered_rules": assessment_dict["triggered_rules"],
             "disclaimer": assessment_dict["disclaimer"],
             "assessment_explanation": assessment_explanation,
-            "clinical_findings": clinicial_findings,
+            "clinical_findings": clinical_findings,
         }
 
         return result
 
     def get_assessments(
-                self,
-                user_id: uuid.UUID,
-                limit: int,
-                offset: int,
-        ) -> AssessmentListResponse:
+        self,
+        user_id: uuid.UUID,
+        limit: int,
+        offset: int,
+    ) -> AssessmentListResponse:
 
-            assessments, total = self.repository.get_assessments_with_count(
-                user_id, limit, offset
-            )
+        assessments, total = self.repository.get_assessments_with_count(
+            user_id, limit, offset
+        )
 
-            summaries: list[AssessmentSummary] = []
+        summaries: list[AssessmentSummary] = []
 
-            for assessment in assessments:
-                # Image count
-                image_count = len(assessment.images)
+        for assessment in assessments:
+            # Image count
+            image_count = len(assessment.images)
 
-                # Grab the first image's analysis result (if any)
-                first_result = None
-                if assessment.images:
-                    first_image = assessment.images[0]
-                    first_result = first_image.analysis_result
+            # Grab the first image's analysis result (if any)
+            first_result = None
+            if assessment.images:
+                first_image = assessment.images[0]
+                first_result = first_image.analysis_result
 
-                summaries.append(
-                    AssessmentSummary(
-                        id=str(assessment.id),
-                        created_at=assessment.created_at.isoformat(),
-                        patient_age=assessment.patient_age,
-                        patient_sex=assessment.patient_sex,
-                        symptoms=assessment.symptoms,
-                        duration=assessment.duration,
-                        risk_level=first_result.risk_level if first_result else None,
-                        risk_score=first_result.risk_score if first_result else None,
-                        wound_type=first_result.wound_type if first_result else None,
-                        emergency=first_result.emergency if first_result else None,
-                        image_count=image_count,
-                    )
+            summaries.append(
+                AssessmentSummary(
+                    id=str(assessment.id),
+                    created_at=assessment.created_at.isoformat(),
+                    patient_age=assessment.patient_age,
+                    patient_sex=assessment.patient_sex,
+                    symptoms=assessment.symptoms,
+                    duration=assessment.duration,
+                    risk_level=first_result.risk_level if first_result else None,
+                    risk_score=first_result.risk_score if first_result else None,
+                    wound_type=first_result.wound_type if first_result else None,
+                    emergency=first_result.emergency if first_result else None,
+                    image_count=image_count,
                 )
-
-            response = AssessmentListResponse(
-                total=total, 
-                assessments=summaries
             )
 
-            return response
+        return AssessmentListResponse(
+            total=total,
+            assessments=summaries,
+        )

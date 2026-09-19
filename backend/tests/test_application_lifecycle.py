@@ -1,5 +1,5 @@
 import asyncio
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 from fastapi import FastAPI
 from starlette.requests import Request
@@ -11,13 +11,13 @@ from app.main import create_app
 def test_create_app_preserves_routes_and_metadata():
     app = create_app()
 
-    paths = {route.path for route in app.routes}
+    paths = set(app.openapi()["paths"].keys())
     assert app.title == "Suri"
     assert {"/", "/auth/login", "/wound/analyze", "/chatbot/message"} <= paths
 
 
 def test_lifespan_initializes_and_releases_resources(monkeypatch):
-    engine = Mock()
+    engine = MagicMock()
     connection = engine.connect.return_value.__enter__.return_value
     redis_client = Mock()
     session_factory = Mock()
@@ -33,6 +33,7 @@ def test_lifespan_initializes_and_releases_resources(monkeypatch):
             assert app.state.database_engine is engine
             assert app.state.session_factory is session_factory
             assert app.state.redis_client is redis_client
+            assert app.state.explanation_service is not None
 
     asyncio.run(exercise_lifespan())
 

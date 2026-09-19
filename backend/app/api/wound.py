@@ -31,17 +31,15 @@ import logging
 
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
-from app.repository.wound_repository import WoundAssessmentRepository
-from app.models.user import User
-from app.services.auth_service import get_current_user
-from app.services.assessment_explanation_service import AssessmentExplanationService
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_wound_service
+from app.models.user import User
 from app.schemas.wound import (
     AssessmentListResponse,
     PatientInfo,
     WoundAnalysisResponse,
 )
+from app.services.auth_service import get_current_user
 from app.services.wound_service import WoundService
 
 logger = logging.getLogger(__name__)
@@ -65,19 +63,18 @@ async def analyze_wound(
     patient: PatientInfo = Depends(PatientInfo.from_form),
     images: list[UploadFile] = File(...),
     db: Session = Depends(get_db),
+    wound_service: WoundService = Depends(get_wound_service),
     current_user: User = Depends(get_current_user),
 ):
-    repository = WoundAssessmentRepository(db)
-    explanation_service = AssessmentExplanationService()    
-    service = WoundService(repository, explanation_service)
-
     try:
-        result = await service.analyze_wound(patient, images, current_user.id)
+        result = await wound_service.analyze_wound(patient, images, current_user.id)
         db.commit()
         return result
     except Exception:
         db.rollback()
-        logger.exception("Wound analysis failed (age=%s sex=%s)", patient.age, patient.sex)
+        logger.exception(
+            "Wound analysis failed (age=%s sex=%s)", patient.age, patient.sex
+        )
         raise
 
 
@@ -94,20 +91,11 @@ async def analyze_wound(
 def list_assessments(
     limit: int = 50,
     offset: int = 0,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    wound_service: WoundService = Depends(get_wound_service),
+    current_user: User = Depends(get_current_user),
 ) -> AssessmentListResponse:
-
-    repository = WoundAssessmentRepository(db)
-    explanation_service = AssessmentExplanationService()
-    service = WoundService(
-        repository,
-        explanation_service,
-        )
-
     try:
-        result = service.get_assessments(current_user.id, limit, offset)
-        return result
+        return wound_service.get_assessments(current_user.id, limit, offset)
     except Exception:
         logger.exception("list_assessments failed (limit=%d offset=%d)", limit, offset)
         raise

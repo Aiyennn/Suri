@@ -15,6 +15,7 @@ from app.core.exception_handlers import register_exception_handlers
 from app.core.logging import configure_logging
 from app.core.redis import create_redis_client
 from app.db.database import create_database_engine, create_session_factory
+from app.services.assessment_explanation_service import AssessmentExplanationService
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ async def lifespan(app: FastAPI):
     engine = None
     redis_client = None
     try:
+
+        # Long lived infrastructure
         engine = create_database_engine(settings)
         session_factory = create_session_factory(engine)
         with engine.connect() as connection:
@@ -35,9 +38,14 @@ async def lifespan(app: FastAPI):
         redis_client = create_redis_client(settings)
         logger.info("Database    : %s", settings.db_url_safe)
         logger.info("Redis       : %s", settings.REDIS_URL)
+
+        # Long lived application services
+        explanation_service = AssessmentExplanationService()
+
         app.state.database_engine = engine
         app.state.session_factory = session_factory
         app.state.redis_client = redis_client
+        app.state.explanation_service = explanation_service
         yield
     finally:
         logger.info("Application shutting down...")
