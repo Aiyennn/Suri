@@ -99,7 +99,11 @@ def list_assessments(
 ) -> AssessmentListResponse:
 
     repository = WoundAssessmentRepository(db)
-    service = WoundService(repository)
+    explanation_service = AssessmentExplanationService()
+    service = WoundService(
+        repository,
+        explanation_service,
+        )
 
     try:
         result = service.get_assessments(current_user.id, limit, offset)
